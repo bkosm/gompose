@@ -7,6 +7,8 @@ heavy docker libraries and others.
 
 It's just enough so that you can set up and clean your environment for some automated tests.
 
+The only hard requirement is `docker-compose` executable on system path.
+
 ## example
 
 ```go
@@ -53,7 +55,10 @@ the user requested a stop.
 
 This is the absolute bare-bone of a library and contributions are welcome.
 
-The first thing on the list are some tests, when covering a larger portion of the cli's capabilities and wait conditions.
+The first thing on the list are some tests, 
+then documentation,
+then more configurability and
+then covering a larger portion of the cli's capabilities and wait conditions.
 
 When contributing, be mindful that the purpose of this library is to be 
 self-contained, lean and easy to use.
