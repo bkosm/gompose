@@ -8,6 +8,8 @@ import (
 )
 
 func TestCommand(t *testing.T) {
+	t.Parallel()
+
 	t.Run("provides output of an existing command", func(t *testing.T) {
 		cmd := *exec.Command("pwd")
 		got, err := run(cmd)
