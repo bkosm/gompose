@@ -30,7 +30,7 @@ func TestIntegration(t *testing.T) {
 	})
 
 	t.Run("cleans up on system signals", func(t *testing.T) {
-		doSignal(t, syscall.SIGTERM)
+		doSignal(t, syscall.SIGINT)
 		time.Sleep(500 * time.Millisecond)
 		assertServiceIsDown(t)
 	})
