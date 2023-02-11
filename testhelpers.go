@@ -43,6 +43,11 @@ func assertServiceIsUp(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func serviceIsDown() bool {
+	err := pingService()
+	return err != nil
+}
+
 func assertServiceIsDown(t *testing.T) {
 	err := pingService()
 	assert.Error(t, err)

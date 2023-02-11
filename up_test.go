@@ -57,7 +57,8 @@ func TestUp(t *testing.T) {
 		assertServiceIsUp(t)
 
 		doSignal(t, syscall.SIGINT)
-		time.Sleep(200 * time.Millisecond)
-		assert.Equal(t, 1, c)
+
+		wasCalled := func() bool { return c == 1 }
+		assert.Eventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
 	})
 }
