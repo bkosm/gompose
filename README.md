@@ -62,7 +62,7 @@ This is the absolute bare-bone of a library and contributions are welcome.
 List of things to do in priority:
 
 1. ~~Tests~~
-1. CI and badges
+1. ~~CI and badges~~
 1. Documentation
 1. ~~Configurability~~
 1. Covering a larger portion of CLI's capabilities
