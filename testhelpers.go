@@ -1,0 +1,20 @@
+package gompose
+
+import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"os/exec"
+	"testing"
+)
+
+const expectedLine = "curl"
+
+func testUp(t *testing.T) {
+	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "up", "-d"))
+	assert.NoError(t, err)
+}
+
+func testDown(t *testing.T) {
+	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "down"))
+	require.NoError(t, err)
+}

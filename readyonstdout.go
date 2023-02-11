@@ -7,41 +7,8 @@ import (
 	"time"
 )
 
-type ReadyOnStdoutOption func(*readyOnStdoutOptions)
-
-type readyOnStdoutOptions struct {
-	awaiting     string
-	times        uint
-	timeout      time.Duration
-	pollInterval time.Duration
-}
-
-func AwaitingText(text string) ReadyOnStdoutOption {
-	return func(o *readyOnStdoutOptions) {
-		o.awaiting = text
-	}
-}
-
-func Times(n uint) ReadyOnStdoutOption {
-	return func(o *readyOnStdoutOptions) {
-		o.times = n
-	}
-}
-
-func WithTimeout(t time.Duration) ReadyOnStdoutOption {
-	return func(o *readyOnStdoutOptions) {
-		o.timeout = t
-	}
-}
-
-func WithPollInterval(t time.Duration) ReadyOnStdoutOption {
-	return func(o *readyOnStdoutOptions) {
-		o.pollInterval = t
-	}
-}
-
-func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOnStdoutOption) ReadyOrErrChan {
-	opts := &readyOnStdoutOptions{
+func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
+	opts := &readyOptions{
 		awaiting:     "",
 		times:        1,
 		pollInterval: 100 * time.Millisecond,
@@ -74,7 +41,7 @@ func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOnStdoutOption) ReadyOrErrChan {
 	return c
 }
 
-func seekCondition(cmd *exec.Cmd, opts *readyOnStdoutOptions, found chan error) {
+func seekCondition(cmd *exec.Cmd, opts *readyOptions, found chan error) {
 	for {
 		select {
 		case <-found:

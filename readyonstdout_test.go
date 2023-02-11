@@ -59,7 +59,7 @@ func TestReadyOnStdout(t *testing.T) {
 		select {
 		case err := <-rc:
 			assert.NoError(t, err)
-		case <-time.After(20 * time.Millisecond): // default is 50ms
+		case <-time.After(50 * time.Millisecond): // default is 100ms
 			t.Fatal("did not complete in time")
 		}
 	})
