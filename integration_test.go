@@ -3,6 +3,7 @@ package gompose
 import (
 	"github.com/stretchr/testify/assert"
 	"os"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -28,8 +29,8 @@ func TestIntegration(t *testing.T) {
 		setup()
 	})
 
-	t.Run("cleans up on system interrupt", func(t *testing.T) {
-		signalInterrupt(t)
+	t.Run("cleans up on system signals", func(t *testing.T) {
+		doSignal(t, syscall.SIGTERM)
 		time.Sleep(200 * time.Millisecond)
 		assertServiceIsDown(t)
 	})

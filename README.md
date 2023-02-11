@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Panic(err)
 	}
-	
+
 	code := m.Run()
 
 	err = gompose.Down()
@@ -48,19 +48,19 @@ func TestMain(m *testing.M) {
 When you run `go test ./...` you will see that the container is starting and running before any tests.
 After the tests conclude, `compose down` is performed.
 
-In case of a system interrupt (`SIGINT`), compose is also run to ensure that no dangling containers are left after
-the user requested a stop.
+In case of a system interrupt (`SIGINT`, `SIGTERM`), the library allows for custom callbacks to ensure that no dangling
+containers are left after the user requested a stop.
 
 ## contributing
 
 This is the absolute bare-bone of a library and contributions are welcome.
 
-The first thing on the list are some tests, 
+The first thing on the list are some tests,
 then documentation,
 then more configurability and
 then covering a larger portion of the cli's capabilities and wait conditions.
 
-When contributing, be mindful that the purpose of this library is to be 
+When contributing, be mindful that the purpose of this library is to be
 self-contained, lean and easy to use.
 
 ## licensing

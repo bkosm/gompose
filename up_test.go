@@ -3,6 +3,7 @@ package gompose
 import (
 	"github.com/stretchr/testify/assert"
 	"os"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -55,7 +56,7 @@ func TestUp(t *testing.T) {
 		assert.NoError(t, err)
 		assertServiceIsUp(t)
 
-		signalInterrupt(t)
+		doSignal(t, syscall.SIGINT)
 		time.Sleep(200 * time.Millisecond)
 		assert.Equal(t, 1, c)
 	})

@@ -61,7 +61,7 @@ func goIntoTestDataDir(t *testing.T) func() {
 	}
 }
 
-func signalInterrupt(t *testing.T) {
-	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+func doSignal(t *testing.T, s syscall.Signal) {
+	err := syscall.Kill(syscall.Getpid(), s)
 	require.NoError(t, err)
 }
