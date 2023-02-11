@@ -19,30 +19,32 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bkosm/gompose"
+	g "github.com/bkosm/gompose"
 )
 
 func TestMain(m *testing.M) {
-	var err error
-
-	// We have a postgres container in the spec
-	err = gompose.Up(
-		gompose.ReadyOnLog("database system is ready to accept connections", 2),
-		func() { _ = gompose.Down() }, // any action to be taken on system interrupt
+	// Let's say we have a postgres container in the spec
+	err := g.Up(
+		g.WithWait(
+			g.ReadyOnLog(g.WithText("database system is ready to accept connections"), g.Times(2)),
+		),
+		g.WithSignalCallback(func(_ os.Signal) { // any action to be taken on SIGINT, SIGTERM
+			_ = g.Down()
+		}),
 	)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	code := m.Run()
 
-	err = gompose.Down()
-	if err != nil {
-		log.Panic(err)
+	if err = g.Down(); err != nil {
+		log.Fatal(err)
 	}
 
 	os.Exit(code)
 }
+
 ```
 
 When you run `go test ./...` you will see that the container is starting and running before any tests.
@@ -55,10 +57,14 @@ containers are left after the user requested a stop.
 
 This is the absolute bare-bone of a library and contributions are welcome.
 
-The first thing on the list are some tests,
-then documentation,
-then more configurability and
-then covering a larger portion of the cli's capabilities and wait conditions.
+List of things to do in priority:
+
+1. ~~Tests~~
+1. CI and badges
+1. Documentation
+1. ~~Configurability~~
+1. Covering a larger portion of CLI's capabilities
+1. More wait conditions
 
 When contributing, be mindful that the purpose of this library is to be
 self-contained, lean and easy to use.
