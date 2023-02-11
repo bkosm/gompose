@@ -1,11 +1,11 @@
 package gompose
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestUp(t *testing.T) {
@@ -36,24 +36,25 @@ func TestUp(t *testing.T) {
 	})
 
 	t.Run("intercepts os signals", func(t *testing.T) {
+		defer testDown(t)
 
+		c := 0
+		callback := func(s os.Signal) {
+			if s == os.Interrupt {
+				c += 1
+			}
+		}
+
+		err := Up(
+			WaitFor(ReadyOnLog(Text(expectedLine), AsReadyOpt(customFileOpt))),
+			OnSignal(callback),
+			AsUpOpt(customFileOpt),
+		)
+		assert.NoError(t, err)
+		assertServiceIsUp(t)
+
+		doSignal(t, syscall.SIGINT)
+		time.Sleep(200 * time.Millisecond)
+		assert.Equal(t, 1, c)
 	})
-}
-
-func assertServiceIsUp(t *testing.T) {
-	err := pingService()
-	assert.NoError(t, err)
-}
-
-func goIntoTestDataDir(t *testing.T) func() {
-	startDir, err := os.Getwd()
-	require.NoError(t, err)
-
-	err = os.Chdir(fmt.Sprintf("%s/testdata", startDir))
-	require.NoError(t, err)
-
-	return func() {
-		err = os.Chdir(startDir)
-		require.NoError(t, err)
-	}
 }

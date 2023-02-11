@@ -43,9 +43,11 @@ func WithPollInterval(t time.Duration) ReadyOption {
 	}
 }
 
-func AsReadyOpt(fn GomposeOption) ReadyOption {
+func AsReadyOpt(fns ...GomposeOption) ReadyOption {
 	g := &gomposeOpts{customFile: nil}
-	fn(g)
+	for _, fn := range fns {
+		fn(g)
+	}
 
 	return func(o *readyOptions) {
 		o.customFile = g.customFile

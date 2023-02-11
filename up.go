@@ -33,9 +33,11 @@ func WithCustomServices(services ...string) UpOption {
 	}
 }
 
-func AsUpOpt(fn GomposeOption) UpOption {
+func AsUpOpt(fns ...GomposeOption) UpOption {
 	g := &gomposeOpts{customFile: nil}
-	fn(g)
+	for _, fn := range fns {
+		fn(g)
+	}
 
 	return func(o *upOpts) {
 		o.customFile = g.customFile
