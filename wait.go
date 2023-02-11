@@ -14,10 +14,10 @@ func ReadyOnStdout(cmd *exec.Cmd, awaiting string, times int) ReadyChan {
 	go func() {
 		for {
 			if res, err := run(*cmd); err != nil {
-				panic(res.error)
+				panic(err)
 			} else {
 				count := 0
-				for _, line := range strings.Split(res.out, "\n") {
+				for _, line := range strings.Split(string(res), "\n") {
 					if strings.Contains(line, awaiting) {
 						count++
 					}

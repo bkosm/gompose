@@ -5,16 +5,13 @@ import (
 	"os/exec"
 )
 
-type cmdResult struct {
-	error error
-	out   string
-}
+type cmdOutput string
 
-func run(cmd exec.Cmd) (cmdResult, error) {
+func run(cmd exec.Cmd) (cmdOutput, error) {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	err := cmd.Run()
 
-	return cmdResult{error: err, out: out.String()}, err
+	return cmdOutput(out.String()), err
 }
