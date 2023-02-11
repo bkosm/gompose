@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"syscall"
 )
 
 type upOpts struct {
@@ -80,14 +81,15 @@ func getCommandArgs(customFile *string, customServices []string) []string {
 
 func handleWait(c ReadyOrErrChan) {
 	if c != nil {
-		_ = <-c
+		<-c
 	}
 }
 
 func handleSignal(callback func(os.Signal)) {
 	if callback != nil {
-		signalChan := make(chan os.Signal)
-		signal.Notify(signalChan, os.Interrupt, os.Kill)
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
 		go func() {
 			s := <-signalChan
 			callback(s)
