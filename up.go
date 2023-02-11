@@ -15,13 +15,13 @@ type upOpts struct {
 
 type UpOption func(*upOpts)
 
-func WaitFor(c ReadyOrErrChan) UpOption {
+func WithWait(c ReadyOrErrChan) UpOption {
 	return func(o *upOpts) {
 		o.wait = c
 	}
 }
 
-func OnSignal(fn func(os.Signal)) UpOption {
+func WithSignalCallback(fn func(os.Signal)) UpOption {
 	return func(o *upOpts) {
 		o.onSignal = fn
 	}
@@ -69,7 +69,7 @@ func Up(fns ...UpOption) error {
 func getCommandArgs(customFile *string, customServices []string) []string {
 	var args []string
 	if customFile != nil {
-		args = append(args, "-f", *customFile)
+		args = []string{"-f", *customFile}
 	}
 	args = append(args, "up", "-d")
 	if customServices != nil {

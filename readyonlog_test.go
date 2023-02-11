@@ -7,13 +7,11 @@ import (
 )
 
 func TestReadyOnLog(t *testing.T) {
-	customFileOpt := WithCustomFile("./testdata/docker-compose.yml")
-
 	t.Run("ready on log pushes compose logs into ReadyOnStdout", func(t *testing.T) {
 		testUp(t)
 		defer testDown(t)
 
-		rc := ReadyOnLog(Text(expectedLine), AsReadyOpt(customFileOpt))
+		rc := ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))
 
 		select {
 		case err := <-rc:

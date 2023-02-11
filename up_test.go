@@ -3,12 +3,16 @@ package gompose
 import (
 	"github.com/stretchr/testify/assert"
 	"os"
-	"syscall"
 	"testing"
 	"time"
 )
 
 func TestUp(t *testing.T) {
+	t.Run("up fails if there is no file", func(t *testing.T) {
+		err := Up()
+		assert.Error(t, err)
+	})
+
 	t.Run("up works with no arguments", func(t *testing.T) {
 		goBack := goIntoTestDataDir(t)
 		defer func() {
@@ -21,13 +25,11 @@ func TestUp(t *testing.T) {
 		assertServiceIsUp(t)
 	})
 
-	customFileOpt := WithCustomFile("./testdata/docker-compose.yml")
-
 	t.Run("up works with options", func(t *testing.T) {
 		defer testDown(t)
 
 		err := Up(
-			WaitFor(ReadyOnLog(Text(expectedLine), AsReadyOpt(customFileOpt))),
+			WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
 			WithCustomServices(customServiceName),
 			AsUpOpt(customFileOpt),
 		)
@@ -46,14 +48,14 @@ func TestUp(t *testing.T) {
 		}
 
 		err := Up(
-			WaitFor(ReadyOnLog(Text(expectedLine), AsReadyOpt(customFileOpt))),
-			OnSignal(callback),
+			WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
+			WithSignalCallback(callback),
 			AsUpOpt(customFileOpt),
 		)
 		assert.NoError(t, err)
 		assertServiceIsUp(t)
 
-		doSignal(t, syscall.SIGINT)
+		signalInterrupt(t)
 		time.Sleep(200 * time.Millisecond)
 		assert.Equal(t, 1, c)
 	})

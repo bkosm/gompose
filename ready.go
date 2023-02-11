@@ -19,7 +19,7 @@ type readyOptions struct {
 	customFile   *string
 }
 
-func Text(text string) ReadyOption {
+func WithText(text string) ReadyOption {
 	return func(o *readyOptions) {
 		o.awaiting = text
 	}

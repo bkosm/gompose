@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	expectedLine      = "server is listening"
-	expectedResponse  = "ok"
+	expectedLogLine   = "server is listening"
 	customServiceName = "echo"
 	containerPort     = 5678
 )
+
+var customFileOpt = WithCustomFile("./testdata/docker-compose.yml")
 
 func testUp(t *testing.T) {
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "up", "-d"))
@@ -60,7 +61,7 @@ func goIntoTestDataDir(t *testing.T) func() {
 	}
 }
 
-func doSignal(t *testing.T, s syscall.Signal) {
-	err := syscall.Kill(syscall.Getpid(), s)
+func signalInterrupt(t *testing.T) {
+	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	require.NoError(t, err)
 }
