@@ -3,9 +3,7 @@ package gompose
 import "os/exec"
 
 func ReadyOnLog(fns ...ReadyOption) ReadyOrErrChan {
-	opts := &readyOptions{
-		customFile: nil,
-	}
+	opts := &readyOptions{customFile: nil}
 	for _, fn := range fns {
 		fn(opts)
 	}

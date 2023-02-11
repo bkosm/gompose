@@ -12,7 +12,7 @@ func TestReadyOnStdout(t *testing.T) {
 
 	t.Run("marks ready when a specified phrase occurs in N lines", func(t *testing.T) {
 		cmd := exec.Command("echo", "1\n2\n3\n2\n")
-		rc := ReadyOnStdout(cmd, AwaitingText("2"), Times(2))
+		rc := ReadyOnStdout(cmd, Text("2"), Times(2))
 
 		select {
 		case <-rc:
@@ -34,7 +34,7 @@ func TestReadyOnStdout(t *testing.T) {
 
 	t.Run("times out after provided duration and returns an error", func(t *testing.T) {
 		cmd := exec.Command("pwd")
-		rc := ReadyOnStdout(cmd, AwaitingText("nope"), WithTimeout(time.Millisecond))
+		rc := ReadyOnStdout(cmd, Text("nope"), WithTimeout(time.Millisecond))
 
 		select {
 		case err := <-rc:
@@ -54,7 +54,7 @@ func TestReadyOnStdout(t *testing.T) {
 		fi
 		`
 		cmd := exec.Command("bash", "-c", c)
-		rc := ReadyOnStdout(cmd, AwaitingText("ok"), WithPollInterval(time.Millisecond))
+		rc := ReadyOnStdout(cmd, Text("ok"), WithPollInterval(time.Millisecond))
 
 		select {
 		case err := <-rc:

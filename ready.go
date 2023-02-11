@@ -19,7 +19,7 @@ type readyOptions struct {
 	customFile   *string
 }
 
-func AwaitingText(text string) ReadyOption {
+func Text(text string) ReadyOption {
 	return func(o *readyOptions) {
 		o.awaiting = text
 	}
@@ -43,8 +43,11 @@ func WithPollInterval(t time.Duration) ReadyOption {
 	}
 }
 
-func WithCustomFile(filepath string) ReadyOption {
+func AsReadyOpt(fn GomposeOption) ReadyOption {
+	g := &gomposeOpts{customFile: nil}
+	fn(g)
+
 	return func(o *readyOptions) {
-		o.customFile = &filepath
+		o.customFile = g.customFile
 	}
 }

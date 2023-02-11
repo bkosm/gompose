@@ -1,7 +1,6 @@
 package gompose
 
 import (
-	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -54,7 +53,6 @@ func seekCondition(cmd *exec.Cmd, opts *readyOptions, found chan error) {
 			} else {
 				count := 0
 				for _, line := range strings.Split(string(res), "\n") {
-					log.Print(line)
 					if strings.Contains(line, opts.awaiting) {
 						count++
 					}

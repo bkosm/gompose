@@ -1,5 +1,8 @@
 version: '3.8'
 services:
-  test:
-    image: alpine/curl:3.14
+  echo:
+    image: hashicorp/http-echo
     restart: always
+    command: -text="ok"
+    ports:
+      - "5678:3901"

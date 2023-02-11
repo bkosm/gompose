@@ -7,7 +7,12 @@ import (
 	"testing"
 )
 
-const expectedLine = "curl"
+const (
+	expectedLine      = "Server is listening"
+	expectedResponse  = "ok"
+	customServiceName = "echo"
+	containerPort     = 5678
+)
 
 func testUp(t *testing.T) {
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "up", "-d"))
