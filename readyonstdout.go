@@ -1,13 +1,11 @@
 package gompose
 
 import (
-	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
 )
-
-type ReadyChan <-chan any
 
 type ReadyOnStdoutOption func(*readyOnStdoutOptions)
 
@@ -42,51 +40,65 @@ func WithPollInterval(t time.Duration) ReadyOnStdoutOption {
 	}
 }
 
-func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOnStdoutOption) ReadyChan {
+func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOnStdoutOption) ReadyOrErrChan {
 	opts := &readyOnStdoutOptions{
 		awaiting:     "",
-		times:        0,
+		times:        1,
 		pollInterval: 100 * time.Millisecond,
 		timeout:      10 * time.Minute,
 	}
 	for _, fn := range fns {
 		fn(opts)
 	}
-	c := make(chan any)
+	c := make(chan error)
 
 	go func() {
-		found := make(chan any)
+		found := make(chan error)
 		go seekCondition(cmd, opts, found)
 
 		select {
-		case <-found:
+		case err := <-found:
+			if err != nil {
+				c <- err
+			}
 			close(c)
 			return
 		case <-time.After(opts.timeout):
-			panic(fmt.Sprintf("gompose: wait condition timed out after %v", opts.timeout))
+			c <- ErrWaitTimedOut
+			close(c)
+			close(found)
+			return
 		}
 	}()
 
 	return c
 }
 
-func seekCondition(cmd *exec.Cmd, opts *readyOnStdoutOptions, found chan any) {
+func seekCondition(cmd *exec.Cmd, opts *readyOnStdoutOptions, found chan error) {
 	for {
-		if res, err := run(*cmd); err != nil {
-			panic(err)
-		} else {
-			count := 0
-			for _, line := range strings.Split(string(res), "\n") {
-				if strings.Contains(line, opts.awaiting) {
-					count++
-				}
-			}
-
-			if count >= int(opts.times) {
+		select {
+		case <-found:
+			return
+		default:
+			if res, err := run(*cmd); err != nil {
+				found <- err
 				close(found)
 				return
 			} else {
-				time.Sleep(opts.pollInterval)
+				count := 0
+				for _, line := range strings.Split(string(res), "\n") {
+					log.Print(line)
+					if strings.Contains(line, opts.awaiting) {
+						count++
+					}
+				}
+
+				if count >= int(opts.times) {
+					close(found)
+					return
+				} else {
+					time.Sleep(opts.pollInterval)
+				}
 			}
 		}
 	}

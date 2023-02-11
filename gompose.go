@@ -6,7 +6,7 @@ import (
 	"os/signal"
 )
 
-func Up(ready ReadyChan, onInterrupt ...func()) error {
+func Up(ready ReadyOrErrChan, onInterrupt ...func()) error {
 	if len(onInterrupt) > 0 {
 		cleanup := onInterrupt[0]
 
