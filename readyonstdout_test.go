@@ -15,7 +15,8 @@ func TestReadyOnStdout(t *testing.T) {
 		rc := ReadyOnStdout(cmd, WithText("2"), Times(2))
 
 		select {
-		case <-rc:
+		case err := <-rc:
+			assert.NoError(t, err)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
 		}
@@ -26,7 +27,20 @@ func TestReadyOnStdout(t *testing.T) {
 		rc := ReadyOnStdout(cmd)
 
 		select {
-		case <-rc:
+		case err := <-rc:
+			assert.NoError(t, err)
+		case <-time.After(time.Second):
+			t.Fatal("was not ready in time")
+		}
+	})
+
+	t.Run("fails immediately with command issues", func(t *testing.T) {
+		cmd := exec.Command("this-shouldnt-work")
+		rc := ReadyOnStdout(cmd)
+
+		select {
+		case err := <-rc:
+			assert.Error(t, err)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
 		}

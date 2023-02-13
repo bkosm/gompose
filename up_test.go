@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"syscall"
@@ -60,5 +61,20 @@ func TestUp(t *testing.T) {
 
 		wasCalled := func() bool { return c == 1 }
 		assert.Eventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
+	})
+
+	t.Run("propagates wait channel errors", func(t *testing.T) {
+		defer testDown(t)
+		c, done := make(chan error), make(chan any)
+		e := errors.New("whoops")
+
+		go func() {
+			err := Up(WithWait(c), AsUpOpt(customFileOpt))
+			assert.ErrorIs(t, err, e)
+			close(done)
+		}()
+
+		c <- e
+		<-done
 	})
 }
