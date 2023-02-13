@@ -51,9 +51,6 @@ jobs:
           git add README.md
           git commit -m "chore: Updated coverage badge"
 
-      - name: Pull
-        run: git pull
-
       - name: Push changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: ad-m/github-push-action@master
