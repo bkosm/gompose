@@ -63,8 +63,7 @@ func Up(fns ...UpOption) error {
 		return err
 	}
 
-	handleWait(opts.wait)
-	return nil
+	return handleWait(opts.wait)
 }
 
 func getCommandArgs(customFile *string, customServices []string) []string {
@@ -79,10 +78,11 @@ func getCommandArgs(customFile *string, customServices []string) []string {
 	return args
 }
 
-func handleWait(c ReadyOrErrChan) {
+func handleWait(c ReadyOrErrChan) error {
 	if c != nil {
-		<-c
+		return <-c
 	}
+	return nil
 }
 
 func handleSignal(callback func(os.Signal)) {
