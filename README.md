@@ -47,7 +47,6 @@ func TestMain(m *testing.M) {
 
 	os.Exit(code)
 }
-
 ```
 
 When you run `go test ./...` you will see that the container is starting and running before any tests.
@@ -55,6 +54,28 @@ After the tests conclude, `compose down` is performed.
 
 In case of a system interrupt (`SIGINT`, `SIGTERM`), the library allows for custom callbacks to ensure that no dangling
 containers are left after the user requested a stop.
+
+#### but I have things to do in the meantime
+
+Waiting is done the idiomatic way - you can await the ready channel without passing it to `Up` whenever:
+
+```go
+//...
+err := g.Up(g.WithSignalCallback(func(_ os.Signal) { _ = g.Down() }))
+if err != nil {
+	log.Fatal(err)
+}
+
+// do stuff
+
+readyOrErr := g.ReadyOnLog(g.WithText("database system is ready to accept connections"), g.Times(2))
+if err := <-readyOrErr; err != nil {
+	log.Fatal(err)
+}
+
+code := m.Run()
+//...
+```
 
 ## contributing
 
