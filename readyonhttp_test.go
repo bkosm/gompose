@@ -37,12 +37,16 @@ func TestReadyOnHttp(t *testing.T) {
 	})
 
 	t.Run("times out when condition cannot be met", func(t *testing.T) {
-		rc := ReadyOnHttp(WithRequest(validRequest(t)), WithTimeout(300*time.Millisecond))
+		rc := ReadyOnHttp(
+			WithRequest(validRequest(t)),
+			WithTimeout(2*time.Millisecond),
+			WithPollInterval(1*time.Millisecond),
+		)
 
 		select {
 		case err := <-rc:
 			assert.ErrorIs(t, err, ErrWaitTimedOut)
-		case <-time.After(400 * time.Millisecond):
+		case <-time.After(4 * time.Millisecond):
 			t.Fatal("did not time out in time")
 		}
 	})
