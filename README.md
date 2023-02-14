@@ -79,6 +79,29 @@ code := m.Run()
 //...
 ```
 
+#### but I want to wait until service passes health-checks
+
+This can be done by using the `ReadyOnHttp` wait channel:
+```go
+healthcheck := must(
+    http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
+)
+
+err := g.Up(g.WithWait(g.ReadyOnHttp(g.WithRequest(healthcheck))))
+```
+
+And you can customize what it means to be healthy too:
+```go
+err := g.Up(g.WithWait(
+    g.ReadyOnHttp(
+        g.WithRequest(healthcheck),
+        g.WithResponseVerifier(func (resp *http.Response) (bool, error) {
+            return resp.StatusCode == http.StatusUnauthorized, nil
+        })
+    ),
+))
+```
+
 ## contributing
 
 This is the absolute bare-bone of a library and contributions are welcome.

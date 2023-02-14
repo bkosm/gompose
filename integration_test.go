@@ -43,4 +43,14 @@ func TestIntegration(t *testing.T) {
 		assert.NoError(t, err)
 		assertServiceIsDown(t)
 	})
+
+	t.Run("allows for waiting on healthy http", func(t *testing.T) {
+		req := validRequest(t)
+
+		err := Up(WithWait(ReadyOnHttp(WithRequest(req))))
+		assert.NoError(t, err)
+		assertServiceIsUp(t)
+
+		assert.NoError(t, Down())
+	})
 }
