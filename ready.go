@@ -16,13 +16,18 @@ const (
 	DefaultWaitTimeout  = 10 * time.Minute
 )
 
+func DefaultResponseVerifier(response *http.Response) (bool, error) {
+	return response.StatusCode == http.StatusOK, nil
+}
+
 type readyOptions struct {
-	awaiting     string
-	times        uint
-	timeout      time.Duration
-	pollInterval time.Duration
-	customFile   *string
-	request      *http.Request
+	awaiting         string
+	times            uint
+	timeout          time.Duration
+	pollInterval     time.Duration
+	customFile       *string
+	request          *http.Request
+	responseVerifier func(response *http.Response) (bool, error)
 }
 
 func WithText(text string) ReadyOption {
@@ -52,6 +57,12 @@ func WithPollInterval(t time.Duration) ReadyOption {
 func WithRequest(req *http.Request) ReadyOption {
 	return func(o *readyOptions) {
 		o.request = req
+	}
+}
+
+func WithResponseVerifier(fn func(response *http.Response) (bool, error)) ReadyOption {
+	return func(o *readyOptions) {
+		o.responseVerifier = fn
 	}
 }
 
