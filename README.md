@@ -1,7 +1,9 @@
 # gompose
-[![](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
+[![GoDoc](https://godoc.org/github.com/bkosm/gompose?status.svg)](https://godoc.org/github.com/bkosm/gompose)
+[![CI](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/bkosm/gompose/actions/workflows/codeql.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/codeql.yml)
 ![Coverage](https://img.shields.io/badge/Coverage-96.3%25-brightgreen)
+[![Go Report](https://goreportcard.com/badge/github.com/bkosm/gompose)](https://goreportcard.com/report/github.com/bkosm/gompose)
 
 Straightforward library to use `docker-compose` programmatically in Go tests.
 
