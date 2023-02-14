@@ -16,28 +16,13 @@ func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
 	for _, fn := range fns {
 		fn(opts)
 	}
-	c := make(chan error)
+	readyOrErr := make(chan error)
 
-	go func() {
-		found := make(chan error)
-		go seekCondition(cmd, opts, found)
+	go seekOrTimeout(opts.timeout, readyOrErr, func(found chan error) {
+		seekCondition(cmd, opts, found)
+	})
 
-		select {
-		case err := <-found:
-			if err != nil {
-				c <- err
-			}
-			close(c)
-			return
-		case <-time.After(opts.timeout):
-			c <- ErrWaitTimedOut
-			close(c)
-			close(found)
-			return
-		}
-	}()
-
-	return c
+	return readyOrErr
 }
 
 func seekCondition(cmd *exec.Cmd, opts *readyOptions, found chan error) {

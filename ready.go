@@ -65,3 +65,21 @@ func AsReadyOpt(fns ...GomposeOption) ReadyOption {
 		o.customFile = g.customFile
 	}
 }
+
+func seekOrTimeout(timeout time.Duration, readyOrErr chan error, seeker func(chan error)) {
+	foundOrErr := make(chan error)
+	go seeker(foundOrErr)
+
+	select {
+	case err := <-foundOrErr:
+		if err != nil {
+			readyOrErr <- err
+		}
+		close(readyOrErr)
+
+	case <-time.After(timeout):
+		readyOrErr <- ErrWaitTimedOut
+		close(readyOrErr)
+		close(foundOrErr)
+	}
+}
