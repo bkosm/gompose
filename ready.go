@@ -2,14 +2,19 @@ package gompose
 
 import (
 	"errors"
+	"net/http"
 	"time"
 )
 
 type ReadyOrErrChan <-chan error
+type ReadyOption func(*readyOptions)
 
 var ErrWaitTimedOut = errors.New("gompose: timed out waiting on condition")
 
-type ReadyOption func(*readyOptions)
+const (
+	DefaultPollInterval = 100 * time.Millisecond
+	DefaultWaitTimeout  = 10 * time.Minute
+)
 
 type readyOptions struct {
 	awaiting     string
@@ -17,6 +22,7 @@ type readyOptions struct {
 	timeout      time.Duration
 	pollInterval time.Duration
 	customFile   *string
+	request      *http.Request
 }
 
 func WithText(text string) ReadyOption {
@@ -40,6 +46,12 @@ func WithTimeout(t time.Duration) ReadyOption {
 func WithPollInterval(t time.Duration) ReadyOption {
 	return func(o *readyOptions) {
 		o.pollInterval = t
+	}
+}
+
+func WithRequest(req *http.Request) ReadyOption {
+	return func(o *readyOptions) {
+		o.request = req
 	}
 }
 

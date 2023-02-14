@@ -10,8 +10,8 @@ func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
 	opts := &readyOptions{
 		awaiting:     "",
 		times:        1,
-		pollInterval: 100 * time.Millisecond,
-		timeout:      10 * time.Minute,
+		pollInterval: DefaultPollInterval,
+		timeout:      DefaultWaitTimeout,
 	}
 	for _, fn := range fns {
 		fn(opts)
