@@ -1,7 +1,6 @@
 package gompose
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -11,13 +10,6 @@ import (
 )
 
 func TestReadyOnHttp(t *testing.T) {
-	correctRequest, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("http://localhost:%d", containerPort),
-		nil,
-	)
-	assert.NoError(t, err)
-
 	t.Run("marks ready immediately with no options specified", func(t *testing.T) {
 		rc := ReadyOnHttp()
 
@@ -33,7 +25,7 @@ func TestReadyOnHttp(t *testing.T) {
 		testUp(t)
 		defer testDown(t)
 
-		rc := ReadyOnHttp(WithRequest(correctRequest))
+		rc := ReadyOnHttp(WithRequest(validRequest(t)))
 
 		select {
 		case err := <-rc:
@@ -45,7 +37,7 @@ func TestReadyOnHttp(t *testing.T) {
 	})
 
 	t.Run("times out when condition cannot be met", func(t *testing.T) {
-		rc := ReadyOnHttp(WithRequest(correctRequest), WithTimeout(300*time.Millisecond))
+		rc := ReadyOnHttp(WithRequest(validRequest(t)), WithTimeout(300*time.Millisecond))
 
 		select {
 		case err := <-rc:
@@ -67,7 +59,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 			return string(bytes) == "ok\n", nil
 		}
-		rc := ReadyOnHttp(WithRequest(correctRequest), WithResponseVerifier(bodyIsOk))
+		rc := ReadyOnHttp(WithRequest(validRequest(t)), WithResponseVerifier(bodyIsOk))
 
 		select {
 		case err := <-rc:

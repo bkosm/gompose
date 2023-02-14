@@ -76,3 +76,14 @@ func doSignal(t *testing.T, s syscall.Signal) {
 	err := syscall.Kill(syscall.Getpid(), s)
 	require.NoError(t, err)
 }
+
+func validRequest(t *testing.T) *http.Request {
+	t.Helper()
+	rq, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("http://localhost:%d", containerPort),
+		nil,
+	)
+	assert.NoError(t, err)
+	return rq
+}

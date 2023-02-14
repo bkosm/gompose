@@ -3,19 +3,20 @@ package gompose
 import "net/http"
 
 func ReadyOnHttp(fns ...ReadyOption) ReadyOrErrChan {
-	opts := &readyOptions{
+	opts := readyOptions{
 		pollInterval:     DefaultPollInterval,
 		timeout:          DefaultWaitTimeout,
 		request:          nil,
 		responseVerifier: DefaultResponseVerifier,
 	}
 	for _, fn := range fns {
-		fn(opts)
+		fn(&opts)
 	}
 
 	readyOrErr := make(chan error)
 	if opts.request == nil {
 		close(readyOrErr)
+		return readyOrErr // deliberate configuration, ready immediately
 	}
 
 	go seekOrTimeout(opts.timeout, opts.pollInterval, readyOrErr, func() (bool, error) {
