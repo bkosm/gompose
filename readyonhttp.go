@@ -10,10 +10,10 @@ func ReadyOnHttp(fns ...ReadyOption) ReadyOrErrChan {
 		fn(opts)
 	}
 
-	c := make(chan error)
+	readyOrErr := make(chan error)
 	if opts.request == nil {
-		close(c)
+		close(readyOrErr)
 	}
 
-	return c
+	return readyOrErr
 }

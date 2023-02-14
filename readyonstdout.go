@@ -3,7 +3,6 @@ package gompose
 import (
 	"os/exec"
 	"strings"
-	"time"
 )
 
 func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
@@ -18,38 +17,23 @@ func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
 	}
 	readyOrErr := make(chan error)
 
-	go seekOrTimeout(opts.timeout, readyOrErr, func(found chan error) {
-		seekCondition(cmd, opts, found)
+	go seekOrTimeout(opts.timeout, opts.pollInterval, readyOrErr, func() (bool, error) {
+		if res, err := run(*cmd); err != nil {
+			return false, err
+		} else {
+			return countLogOccurrences(res, opts.awaiting) >= int(opts.times), nil
+		}
 	})
 
 	return readyOrErr
 }
 
-func seekCondition(cmd *exec.Cmd, opts *readyOptions, found chan error) {
-	for {
-		select {
-		case <-found:
-			return
-		default:
-			if res, err := run(*cmd); err != nil {
-				found <- err
-				close(found)
-				return
-			} else {
-				count := 0
-				for _, line := range strings.Split(string(res), "\n") {
-					if strings.Contains(line, opts.awaiting) {
-						count++
-					}
-				}
-
-				if count >= int(opts.times) {
-					close(found)
-					return
-				} else {
-					time.Sleep(opts.pollInterval)
-				}
-			}
+func countLogOccurrences(res cmdOutput, awaiting string) int {
+	count := 0
+	for _, line := range strings.Split(string(res), "\n") {
+		if strings.Contains(line, awaiting) {
+			count++
 		}
 	}
+	return count
 }

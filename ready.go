@@ -66,9 +66,30 @@ func AsReadyOpt(fns ...GomposeOption) ReadyOption {
 	}
 }
 
-func seekOrTimeout(timeout time.Duration, readyOrErr chan error, seeker func(chan error)) {
+func seekOrTimeout(
+	timeout, pollInterval time.Duration,
+	readyOrErr chan error,
+	seeker func() (bool, error),
+) {
 	foundOrErr := make(chan error)
-	go seeker(foundOrErr)
+	go func() {
+		for {
+			select {
+			case <-foundOrErr:
+				return // timeout
+			default:
+				if found, err := seeker(); err != nil {
+					foundOrErr <- err
+					return // can not proceed with waiting
+				} else if found {
+					close(foundOrErr)
+					return // found
+				} else {
+					time.Sleep(pollInterval)
+				}
+			}
+		}
+	}()
 
 	select {
 	case err := <-foundOrErr:
