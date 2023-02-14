@@ -16,7 +16,7 @@ func TestReadyOnLog(t *testing.T) {
 		select {
 		case err := <-rc:
 			assert.NoError(t, err)
-		case <-time.After(5 * time.Minute):
+		case <-time.After(2 * time.Minute):
 			t.Fatal("time out waiting on compose (might be pulling the image)")
 		}
 	})
