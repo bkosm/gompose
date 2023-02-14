@@ -20,11 +20,13 @@ const (
 var customFileOpt = WithCustomFile("./testdata/docker-compose.yml")
 
 func testUp(t *testing.T) {
+	t.Helper()
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "up", "-d"))
 	assert.NoError(t, err)
 }
 
 func testDown(t *testing.T) {
+	t.Helper()
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "down"))
 	require.NoError(t, err)
 }
@@ -39,6 +41,7 @@ func pingService() error {
 }
 
 func assertServiceIsUp(t *testing.T) {
+	t.Helper()
 	err := pingService()
 	assert.NoError(t, err)
 }
@@ -49,11 +52,13 @@ func serviceIsDown() bool {
 }
 
 func assertServiceIsDown(t *testing.T) {
+	t.Helper()
 	err := pingService()
 	assert.Error(t, err)
 }
 
 func goIntoTestDataDir(t *testing.T) func() {
+	t.Helper()
 	startDir, err := os.Getwd()
 	require.NoError(t, err)
 
@@ -67,6 +72,7 @@ func goIntoTestDataDir(t *testing.T) func() {
 }
 
 func doSignal(t *testing.T, s syscall.Signal) {
+	t.Helper()
 	err := syscall.Kill(syscall.Getpid(), s)
 	require.NoError(t, err)
 }
