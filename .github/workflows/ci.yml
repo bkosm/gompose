@@ -12,6 +12,7 @@ permissions:
   pull-requests: write
 jobs:
   ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
     steps:
       - name: Go with cache setup
