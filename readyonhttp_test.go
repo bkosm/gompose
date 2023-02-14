@@ -3,7 +3,6 @@ package gompose
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"testing"
@@ -54,7 +53,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		bodyIsOk := func(resp *http.Response) (bool, error) {
 			bytes, err := io.ReadAll(resp.Body)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 
 			defer resp.Body.Close()
 

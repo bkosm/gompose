@@ -3,7 +3,6 @@ package gompose
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"os"
 	"os/exec"
@@ -28,7 +27,7 @@ func testUp(t *testing.T) {
 func testDown(t *testing.T) {
 	t.Helper()
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "down"))
-	require.NoError(t, err)
+	assert.NoError(t, err)
 }
 
 func pingService() error {
@@ -60,21 +59,21 @@ func assertServiceIsDown(t *testing.T) {
 func goIntoTestDataDir(t *testing.T) func() {
 	t.Helper()
 	startDir, err := os.Getwd()
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	err = os.Chdir(fmt.Sprintf("%s/testdata", startDir))
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	return func() {
 		err = os.Chdir(startDir)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	}
 }
 
 func doSignal(t *testing.T, s syscall.Signal) {
 	t.Helper()
 	err := syscall.Kill(syscall.Getpid(), s)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 }
 
 func validRequest(t *testing.T) *http.Request {
