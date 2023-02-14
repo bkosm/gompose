@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -67,6 +68,28 @@ func TestReadyOnHttp(t *testing.T) {
 			assertServiceIsUp(t)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
+		}
+	})
+
+	t.Run("custom verifier can return immediate error", func(t *testing.T) {
+		testUp(t)
+		defer testDown(t)
+
+		expected := errors.New("whoops")
+		troublemaker := func(resp *http.Response) (bool, error) {
+			return false, expected
+		}
+		rc := ReadyOnHttp(
+			WithRequest(validRequest(t)),
+			WithResponseVerifier(troublemaker),
+			WithPollInterval(time.Second), // to avoid flakiness
+		)
+
+		select {
+		case err := <-rc:
+			assert.ErrorIs(t, err, expected)
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("did not fail in time")
 		}
 	})
 }
