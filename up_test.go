@@ -2,7 +2,6 @@ package gompose
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"syscall"
 	"testing"
@@ -11,8 +10,10 @@ import (
 
 func TestUp(t *testing.T) {
 	t.Run("up fails if there is no file", func(t *testing.T) {
+		t.Parallel()
+
 		err := Up()
-		assert.Error(t, err)
+		assertError(t, err)
 	})
 
 	t.Run("up works with no arguments", func(t *testing.T) {
@@ -23,7 +24,7 @@ func TestUp(t *testing.T) {
 		}()
 
 		err := Up()
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsUp(t)
 	})
 
@@ -35,7 +36,7 @@ func TestUp(t *testing.T) {
 			WithCustomServices(customServiceName),
 			AsUpOpt(customFileOpt),
 		)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsUp(t)
 	})
 
@@ -54,27 +55,27 @@ func TestUp(t *testing.T) {
 			WithSignalCallback(callback),
 			AsUpOpt(customFileOpt),
 		)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsUp(t)
 
 		doSignal(t, syscall.SIGINT)
 
 		wasCalled := func() bool { return c == 1 }
-		assert.Eventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
+		assertEventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
 	})
 
 	t.Run("propagates wait channel errors", func(t *testing.T) {
 		defer testDown(t)
 		c, done := make(chan error), make(chan any)
-		e := errors.New("whoops")
+		expected := errors.New("whoops")
 
 		go func() {
 			err := Up(WithWait(c), AsUpOpt(customFileOpt))
-			assert.ErrorIs(t, err, e)
+			assertError(t, err, expected)
 			close(done)
 		}()
 
-		c <- e
+		c <- expected
 		<-done
 	})
 }

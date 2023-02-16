@@ -2,7 +2,6 @@ package gompose
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
@@ -11,11 +10,13 @@ import (
 
 func TestReadyOnHttp(t *testing.T) {
 	t.Run("marks ready immediately with no options specified", func(t *testing.T) {
+		t.Parallel()
+
 		rc := ReadyOnHttp()
 
 		select {
 		case err := <-rc:
-			assert.NoError(t, err)
+			assertNoError(t, err)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
 		}
@@ -29,7 +30,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.NoError(t, err)
+			assertNoError(t, err)
 			assertServiceIsUp(t)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
@@ -45,7 +46,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.ErrorIs(t, err, ErrWaitTimedOut)
+			assertError(t, err, ErrWaitTimedOut)
 		case <-time.After(4 * time.Millisecond):
 			t.Fatal("did not time out in time")
 		}
@@ -57,7 +58,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		bodyIsOk := func(resp *http.Response) (bool, error) {
 			bytes, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err)
+			assertNoError(t, err)
 
 			defer resp.Body.Close()
 
@@ -67,7 +68,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.NoError(t, err)
+			assertNoError(t, err)
 			assertServiceIsUp(t)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
@@ -90,7 +91,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.ErrorIs(t, err, expected)
+			assertError(t, err, expected)
 		case <-time.After(100 * time.Millisecond):
 			t.Fatal("did not fail in time")
 		}
