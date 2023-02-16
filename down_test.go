@@ -3,6 +3,7 @@ package gompose
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestDown(t *testing.T) {
@@ -18,7 +19,9 @@ func TestDown(t *testing.T) {
 
 	t.Run("down cleans up after a successful setup", func(t *testing.T) {
 		testUp(t)
-		assertServiceIsUp(t)
+		assertEventually(t, func() bool {
+			return serviceIsUp()
+		}, time.Second, 50*time.Millisecond)
 
 		err := Down(AsDownOpt(customFileOpt))
 		assert.NoError(t, err)

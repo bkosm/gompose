@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"syscall"
 	"testing"
+	"time"
 )
 
 const (
@@ -35,8 +37,16 @@ func pingService() error {
 	if err != nil {
 		return err
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("ping status code was not 200")
+	}
 	return nil
+}
+
+func serviceIsUp() bool {
+	err := pingService()
+	return err == nil
 }
 
 func assertServiceIsUp(t *testing.T) {
@@ -78,11 +88,39 @@ func doSignal(t *testing.T, s syscall.Signal) {
 
 func validRequest(t *testing.T) *http.Request {
 	t.Helper()
-	rq, err := http.NewRequest(
+
+	return MustT[*http.Request](t)(http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("http://localhost:%d", containerPort),
 		nil,
-	)
-	assert.NoError(t, err)
-	return rq
+	))
+}
+
+// assertEventually is a helper function copied from stretchr/testify
+func assertEventually(t *testing.T, condition func() bool, waitFor time.Duration, tick time.Duration) bool {
+	t.Helper()
+
+	ch := make(chan bool, 1)
+
+	timer := time.NewTimer(waitFor)
+	defer timer.Stop()
+
+	ticker := time.NewTicker(tick)
+	defer ticker.Stop()
+
+	for tick := ticker.C; ; {
+		select {
+		case <-timer.C:
+			t.Fatal("condition not satisfied")
+			return false
+		case <-tick:
+			tick = nil
+			go func() { ch <- condition() }()
+		case v := <-ch:
+			if v {
+				return true
+			}
+			tick = ticker.C
+		}
+	}
 }

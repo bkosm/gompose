@@ -31,7 +31,7 @@ func TestIntegration(t *testing.T) {
 
 	t.Run("cleans up on system signals", func(t *testing.T) {
 		doSignal(t, syscall.SIGINT)
-		assert.Eventually(t, serviceIsDown, 5*time.Second, 100*time.Millisecond)
+		assertEventually(t, serviceIsDown, 5*time.Second, 100*time.Millisecond)
 	})
 
 	t.Run("sets up again after a forced exit", func(t *testing.T) {

@@ -60,7 +60,7 @@ func TestUp(t *testing.T) {
 		doSignal(t, syscall.SIGINT)
 
 		wasCalled := func() bool { return c == 1 }
-		assert.Eventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
+		assertEventually(t, wasCalled, 5*time.Second, 100*time.Millisecond)
 	})
 
 	t.Run("propagates wait channel errors", func(t *testing.T) {
