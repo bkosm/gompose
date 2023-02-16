@@ -3,7 +3,6 @@ package gompose
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"os/exec"
@@ -23,13 +22,17 @@ var customFileOpt = WithCustomFile("./testdata/docker-compose.yml")
 func testUp(t *testing.T) {
 	t.Helper()
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "up", "-d"))
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testDown(t *testing.T) {
 	t.Helper()
 	_, err := run(*exec.Command("docker-compose", "-f", "./testdata/docker-compose.yml", "down"))
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func pingService() error {
@@ -52,7 +55,9 @@ func serviceIsUp() bool {
 func assertServiceIsUp(t *testing.T) {
 	t.Helper()
 	err := pingService()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal("expected service to be up, got", err)
+	}
 }
 
 func serviceIsDown() bool {
@@ -63,27 +68,37 @@ func serviceIsDown() bool {
 func assertServiceIsDown(t *testing.T) {
 	t.Helper()
 	err := pingService()
-	assert.Error(t, err)
+	if err == nil {
+		t.Fatal("service is up")
+	}
 }
 
 func goIntoTestDataDir(t *testing.T) func() {
 	t.Helper()
 	startDir, err := os.Getwd()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = os.Chdir(fmt.Sprintf("%s/testdata", startDir))
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	return func() {
 		err = os.Chdir(startDir)
-		assert.NoError(t, err)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
 func doSignal(t *testing.T, s syscall.Signal) {
 	t.Helper()
 	err := syscall.Kill(syscall.Getpid(), s)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func validRequest(t *testing.T) *http.Request {
@@ -97,7 +112,7 @@ func validRequest(t *testing.T) *http.Request {
 }
 
 // assertEventually is a helper function copied from stretchr/testify
-func assertEventually(t *testing.T, condition func() bool, waitFor time.Duration, tick time.Duration) bool {
+func assertEventually(t *testing.T, condition func() bool, waitFor time.Duration, tick time.Duration) {
 	t.Helper()
 
 	ch := make(chan bool, 1)
@@ -111,16 +126,43 @@ func assertEventually(t *testing.T, condition func() bool, waitFor time.Duration
 	for tick := ticker.C; ; {
 		select {
 		case <-timer.C:
-			t.Fatal("condition not satisfied")
-			return false
+			t.Fatal("eventual condition not satisfied")
+			return
 		case <-tick:
 			tick = nil
 			go func() { ch <- condition() }()
 		case v := <-ch:
 			if v {
-				return true
+				return
 			}
 			tick = ticker.C
 		}
+	}
+}
+
+func assertError(t *testing.T, errs ...error) {
+	t.Helper()
+	l := len(errs)
+	switch l {
+	case 0:
+		return
+	case 1:
+		if errs[0] == nil {
+			t.Fatal("expected error, got nil")
+		}
+	default:
+		expected := errs[l-1]
+		for _, err := range errs[:l-1] {
+			if err == nil || !errors.Is(err, expected) {
+				t.Fatalf("expected error of %v but got %v instead", expected, err)
+			}
+		}
+	}
+}
+
+func assertNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal("expected no error, got", err)
 	}
 }
