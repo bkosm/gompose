@@ -1,5 +1,5 @@
 # gompose
-![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-99.3%25-brightgreen)
 [![GoDoc](https://godoc.org/github.com/bkosm/gompose?status.svg)](https://godoc.org/github.com/bkosm/gompose)
 [![CI](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/bkosm/gompose/actions/workflows/codeql.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/codeql.yml)
@@ -83,7 +83,8 @@ code := m.Run()
 
 This can be done by using the `ReadyOnHttp` wait channel:
 ```go
-healthcheck := must(
+mustRq := g.MustT[*http.Request](t)
+hc := mustRq(
     http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
 )
 
@@ -94,7 +95,7 @@ And you can customize what it means to be healthy too:
 ```go
 err := g.Up(g.WithWait(
     g.ReadyOnHttp(
-        g.WithRequest(healthcheck),
+        g.WithRequest(hc),
         g.WithResponseVerifier(func (resp *http.Response) (bool, error) {
             return resp.StatusCode == http.StatusUnauthorized, nil
         })

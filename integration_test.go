@@ -1,7 +1,6 @@
 package gompose
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"syscall"
 	"testing"
@@ -21,7 +20,7 @@ func TestIntegration(t *testing.T) {
 				_ = Down()
 			}),
 		)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsUp(t)
 	}
 
@@ -31,7 +30,7 @@ func TestIntegration(t *testing.T) {
 
 	t.Run("cleans up on system signals", func(t *testing.T) {
 		doSignal(t, syscall.SIGINT)
-		assert.Eventually(t, serviceIsDown, 5*time.Second, 100*time.Millisecond)
+		assertEventually(t, serviceIsDown, 5*time.Second, 100*time.Millisecond)
 	})
 
 	t.Run("sets up again after a forced exit", func(t *testing.T) {
@@ -40,7 +39,7 @@ func TestIntegration(t *testing.T) {
 
 	t.Run("cleans up on direct request", func(t *testing.T) {
 		err := Down()
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsDown(t)
 	})
 
@@ -48,9 +47,8 @@ func TestIntegration(t *testing.T) {
 		req := validRequest(t)
 
 		err := Up(WithWait(ReadyOnHttp(WithRequest(req))))
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		assertServiceIsUp(t)
-
-		assert.NoError(t, Down())
+		assertNoError(t, Down())
 	})
 }

@@ -1,7 +1,6 @@
 package gompose
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -15,7 +14,7 @@ func TestReadyOnLog(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.NoError(t, err)
+			assertNoError(t, err)
 		case <-time.After(2 * time.Minute):
 			t.Fatal("time out waiting on compose (might be pulling the image)")
 		}
@@ -30,7 +29,7 @@ func TestReadyOnLog(t *testing.T) {
 
 		select {
 		case err := <-rc:
-			assert.NoError(t, err)
+			assertNoError(t, err)
 		case <-time.After(time.Second):
 			t.Fatal("was not ready in time")
 		}
