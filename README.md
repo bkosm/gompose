@@ -88,7 +88,7 @@ hc := mustRq(
     http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
 )
 
-err := g.Up(g.WithWait(g.ReadyOnHttp(g.WithRequest(healthcheck))))
+err := g.Up(g.WithWait(g.ReadyOnHttp(g.WithRequest(hc))))
 ```
 
 And you can customize what it means to be healthy too:
