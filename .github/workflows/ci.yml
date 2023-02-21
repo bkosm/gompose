@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 jobs:
   release:
-    name: Test and tag on master
+    name: Lint, test, coverage and tag if on master
     runs-on: ubuntu-latest
     steps:
       - name: Go with cache setup
