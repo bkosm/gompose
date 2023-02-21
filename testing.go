@@ -1,13 +1,20 @@
 package gompose
 
-import "testing"
+type tt interface {
+	Helper()
+	Fatal(args ...any)
+}
 
-func MustT[T any](t *testing.T) func(v T, err error) T {
-	t.Helper()
+// MustT is a helper function returns a value factory which will eliminate the need to check for errors
+// when spawning stubs and fixtures for testing.
+// Pass it the instance of *testing.T.
+func MustT[T any](t interface{}) func(v T, err error) T {
+	tt := t.(tt)
+	tt.Helper()
 
 	return func(v T, err error) T {
 		if err != nil {
-			t.Fatal(err)
+			tt.Fatal(err)
 		}
 		return v
 	}

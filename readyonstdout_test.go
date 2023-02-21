@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"fmt"
 	"os/exec"
 	"testing"
 	"time"
@@ -19,6 +20,20 @@ func TestReadyOnStdout(t *testing.T) {
 		case err := <-rc:
 			assertNoError(t, err)
 		case <-time.After(time.Second):
+			t.Fatal("was not ready in time")
+		}
+	})
+
+	t.Run("returns immediate success if times is 0", func(t *testing.T) {
+		t.Parallel()
+
+		cmd := exec.Command("pwd")
+		rc := ReadyOnStdout(cmd, WithText("dk"), Times(0))
+
+		select {
+		case err := <-rc:
+			assertNoError(t, err)
+		case <-time.After(15 * time.Millisecond):
 			t.Fatal("was not ready in time")
 		}
 	})
@@ -86,4 +101,19 @@ func TestReadyOnStdout(t *testing.T) {
 			t.Fatal("did not complete in time")
 		}
 	})
+}
+
+func ExampleReadyOnStdout() {
+	cmd := exec.Command("echo", `
+		wow this
+		is actually
+		quite versatile
+		wow
+	`)
+	ch := ReadyOnStdout(cmd, WithText("wow"), Times(2))
+
+	<-ch
+	fmt.Println("that indeed happened")
+	// Output:
+	// that indeed happened
 }

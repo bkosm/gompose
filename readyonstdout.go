@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+// ReadyOnStdout returns a ReadyOrErrChan that is ready when the specified string is found in the
+// stdout or stderr produced by the specified exec.Cmd.
+// The channel will be closed immediately if no options are specified.
+// An ErrWaitTimedOut will be returned if the timeout is reached.
+// Times is defaulted to 1.
+// The command will be run once per poll interval.
 func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
 	opts := &readyOptions{
 		awaiting:     "",
