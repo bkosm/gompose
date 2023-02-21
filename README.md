@@ -1,5 +1,5 @@
 # gompose
-![Coverage](https://img.shields.io/badge/Coverage-99.3%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
 [![GoDoc](https://godoc.org/github.com/bkosm/gompose?status.svg)](https://godoc.org/github.com/bkosm/gompose)
 [![CI](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/bkosm/gompose/actions/workflows/codeql.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/codeql.yml)
