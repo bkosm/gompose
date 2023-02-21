@@ -8,6 +8,8 @@ permissions:
   contents: write
   pull-requests: write
 jobs:
+  strategy:
+    max-parallel: 1
   ci:
     name: Continuous Integration
     runs-on: ubuntu-latest
