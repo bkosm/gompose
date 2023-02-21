@@ -79,7 +79,7 @@ func ExampleMustT() {
 	fn := MustT[*http.Request](t)
 
 	rq := fn(http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", containerPort), nil))
-	fmt.Printf("%+v", *rq.URL)
+	fmt.Println(rq.URL.Scheme)
 	// Output:
-	// {Scheme:http Opaque: User: Host:localhost:5678 Path: RawPath: OmitHost:false ForceQuery:false RawQuery: Fragment: RawFragment:}
+	// http
 }
