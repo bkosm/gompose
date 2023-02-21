@@ -4,14 +4,18 @@ import (
 	"os/exec"
 )
 
-type DownOption func(*downOpts)
+type (
+	// DownOption is a function that configures docker-compose down invocation.
+	DownOption func(*downOpts)
 
-type downOpts struct {
-	customFile *string
-}
+	downOpts struct {
+		customFile *string
+	}
+)
 
-func AsDownOpt(fns ...GomposeOption) DownOption {
-	g := &gomposeOpts{customFile: nil}
+// AsDownOpt converts GlobalOption s which are useful in the context of Down to a DownOption.
+func AsDownOpt(fns ...GlobalOption) DownOption {
+	g := &globalOpts{customFile: nil}
 	for _, fn := range fns {
 		fn(g)
 	}
@@ -21,6 +25,9 @@ func AsDownOpt(fns ...GomposeOption) DownOption {
 	}
 }
 
+// Down stops and removes containers, networks, images, and volumes specified in compose file.
+// It can be configured with a custom compose file path.
+// Returns an error if shell command fails.
 func Down(fns ...DownOption) error {
 	opts := &downOpts{customFile: nil}
 	for _, fn := range fns {

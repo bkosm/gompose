@@ -1,13 +1,17 @@
 package gompose
 
-type GomposeOption func(*gomposeOpts)
+type (
+	// GlobalOption is a function that configures global gompose options, shared by all gompose commands.
+	GlobalOption func(*globalOpts)
 
-type gomposeOpts struct {
-	customFile *string
-}
+	globalOpts struct {
+		customFile *string
+	}
+)
 
-func WithCustomFile(filepath string) GomposeOption {
-	return func(o *gomposeOpts) {
+// WithCustomFile sets the path of a custom compose file to be used by gompose.
+func WithCustomFile(filepath string) GlobalOption {
+	return func(o *globalOpts) {
 		o.customFile = &filepath
 	}
 }

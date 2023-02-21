@@ -2,6 +2,7 @@ package gompose
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"syscall"
 	"testing"
@@ -78,4 +79,18 @@ func TestUp(t *testing.T) {
 		c <- expected
 		<-done
 	})
+}
+
+func ExampleUp() {
+	_ = Up(
+		WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
+		WithCustomServices(customServiceName),
+		AsUpOpt(customFileOpt),
+	)
+
+	fmt.Println("the containers are ready to go!")
+	// Output:
+	// the containers are ready to go!
+
+	_ = Down(AsDownOpt(customFileOpt))
 }

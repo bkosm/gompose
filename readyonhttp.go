@@ -2,6 +2,11 @@ package gompose
 
 import "net/http"
 
+// ReadyOnHttp returns a channel that will be closed when the configured http check on the containers is successful.
+// The channel will be closed immediately if no options are specified or the request is nil.
+// An error will be returned if the request is not nil and the response verifier returns an error,
+// and a ErrWaitTimedOut error will be returned if the timeout is reached.
+// If the request fails due to a network error, the request will be retried until the timeout is reached.
 func ReadyOnHttp(fns ...ReadyOption) ReadyOrErrChan {
 	opts := readyOptions{
 		pollInterval:     DefaultPollInterval,
@@ -32,5 +37,6 @@ func ReadyOnHttp(fns ...ReadyOption) ReadyOrErrChan {
 
 		return ready, nil
 	})
+
 	return readyOrErr
 }

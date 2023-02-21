@@ -2,6 +2,7 @@ package gompose
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -96,4 +97,17 @@ func TestReadyOnHttp(t *testing.T) {
 			t.Fatal("did not fail in time")
 		}
 	})
+}
+
+func ExampleReadyOnHttp() {
+	_ = Up(AsUpOpt(customFileOpt))
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", containerPort), nil)
+	ch := ReadyOnHttp(WithRequest(request))
+
+	<-ch
+	fmt.Println("the service is up now")
+	// Output:
+	// the service is up now
+
+	_ = Down(AsDownOpt(customFileOpt))
 }

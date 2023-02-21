@@ -7,35 +7,44 @@ import (
 	"syscall"
 )
 
-type upOpts struct {
-	wait           ReadyOrErrChan
-	onSignal       func(os.Signal)
-	customServices []string
-	customFile     *string
-}
+type (
+	// UpOption  is a function that configures docker-compose up invocation.
+	UpOption func(*upOpts)
 
-type UpOption func(*upOpts)
+	upOpts struct {
+		wait           ReadyOrErrChan
+		onSignal       func(os.Signal)
+		customServices []string
+		customFile     *string
+	}
+)
 
+// WithWait suspends the programs' execution until the provided channel returns an error or is closed.
+// See ReadyOrErrChan for more information.
 func WithWait(c ReadyOrErrChan) UpOption {
 	return func(o *upOpts) {
 		o.wait = c
 	}
 }
 
+// WithSignalCallback registers a callback function that is called when the program receives a SIGINT or SIGTERM signal.
+// Useful for graceful shutdown of the program.
 func WithSignalCallback(fn func(os.Signal)) UpOption {
 	return func(o *upOpts) {
 		o.onSignal = fn
 	}
 }
 
+// WithCustomServices allows to declare a list of services specified in the compose file to be started.
 func WithCustomServices(services ...string) UpOption {
 	return func(o *upOpts) {
 		o.customServices = services
 	}
 }
 
-func AsUpOpt(fns ...GomposeOption) UpOption {
-	g := &gomposeOpts{customFile: nil}
+// AsUpOpt converts global GlobalOption which are useful in the context of Up to a UpOption.
+func AsUpOpt(fns ...GlobalOption) UpOption {
+	g := &globalOpts{customFile: nil}
 	for _, fn := range fns {
 		fn(g)
 	}
@@ -45,6 +54,10 @@ func AsUpOpt(fns ...GomposeOption) UpOption {
 	}
 }
 
+// Up starts containers specified in compose file.
+// It can be configured with a custom compose file path and a list of services to be started.
+// Returns an error if shell command fails or if the provided channel returns an error.
+// When provided WithWait option, the program execution is suspended until the channel is closed or returns an error.
 func Up(fns ...UpOption) error {
 	opts := &upOpts{
 		wait:           nil,

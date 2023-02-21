@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -28,4 +29,12 @@ func TestDown(t *testing.T) {
 		assertNoError(t, err)
 		assertServiceIsDown(t)
 	})
+}
+
+func ExampleDown() {
+	err := Down(AsDownOpt(WithCustomFile("./testdata/docker-compose.yml")))
+	fmt.Print(err)
+
+	// Output:
+	// <nil>
 }

@@ -83,10 +83,8 @@ code := m.Run()
 
 This can be done by using the `ReadyOnHttp` wait channel:
 ```go
-mustRq := g.MustT[*http.Request](t)
-hc := mustRq(
-    http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
-)
+fc := g.MustT[*http.Request](t)
+hc := fc(http.NewRequest(http.MethodGet, "http://localhost:5432", nil))
 
 err := g.Up(g.WithWait(g.ReadyOnHttp(g.WithRequest(hc))))
 ```
@@ -96,8 +94,8 @@ And you can customize what it means to be healthy too:
 err := g.Up(g.WithWait(
     g.ReadyOnHttp(
         g.WithRequest(hc),
-        g.WithResponseVerifier(func (resp *http.Response) (bool, error) {
-            return resp.StatusCode == http.StatusUnauthorized, nil
+        g.WithResponseVerifier(func (r *http.Response) (bool, error) {
+            return r.StatusCode == http.StatusUnauthorized, nil
         })
     ),
 ))
@@ -109,10 +107,6 @@ This is the absolute bare-bone of a library and contributions are welcome.
 
 List of things to do in priority:
 
-1. ~~Tests~~
-1. ~~CI and badges~~
-1. Documentation
-1. ~~Configurability~~
 1. Covering a larger portion of CLI's capabilities
 1. More wait conditions
 

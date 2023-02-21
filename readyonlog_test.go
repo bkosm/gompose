@@ -1,6 +1,7 @@
 package gompose
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -34,4 +35,16 @@ func TestReadyOnLog(t *testing.T) {
 			t.Fatal("was not ready in time")
 		}
 	})
+}
+
+func ExampleReadyOnLog() {
+	_ = Up(AsUpOpt(customFileOpt))
+	ch := ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))
+
+	<-ch
+	fmt.Println("the service is up now")
+	// Output:
+	// the service is up now
+
+	_ = Down(AsDownOpt(customFileOpt))
 }
