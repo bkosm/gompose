@@ -8,10 +8,8 @@ permissions:
   contents: write
   pull-requests: write
 jobs:
-  strategy:
-    max-parallel: 1
-  ci:
-    name: Continuous Integration
+  release:
+    name: Test and tag on master
     runs-on: ubuntu-latest
     steps:
       - name: Go with cache setup
@@ -57,16 +55,9 @@ jobs:
         with:
           github_token: ${{ github.token }}
           branch: ${{ github.head_ref }}
-  tag:
-    name: Bump version tag
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Bump version and push tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
