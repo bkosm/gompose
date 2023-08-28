@@ -14,7 +14,7 @@ func TestReadyOnStdout(t *testing.T) {
 		t.Parallel()
 
 		cmd := exec.Command("echo", "1\n2\n3\n2\n")
-		rc := ReadyOnStdout(cmd, WithText("2"), Times(2))
+		rc := ReadyOnStdout(cmd, "2", Times(2))
 
 		select {
 		case err := <-rc:
@@ -28,7 +28,7 @@ func TestReadyOnStdout(t *testing.T) {
 		t.Parallel()
 
 		cmd := exec.Command("pwd")
-		rc := ReadyOnStdout(cmd, WithText("dk"), Times(0))
+		rc := ReadyOnStdout(cmd, "dk", Times(0))
 
 		select {
 		case err := <-rc:
@@ -38,25 +38,11 @@ func TestReadyOnStdout(t *testing.T) {
 		}
 	})
 
-	t.Run("marks ready immediately with no options specified", func(t *testing.T) {
-		t.Parallel()
-
-		cmd := exec.Command("pwd")
-		rc := ReadyOnStdout(cmd)
-
-		select {
-		case err := <-rc:
-			assertNoError(t, err)
-		case <-time.After(time.Second):
-			t.Fatal("was not ready in time")
-		}
-	})
-
 	t.Run("fails immediately with command issues", func(t *testing.T) {
 		t.Parallel()
 
 		cmd := exec.Command("this-shouldnt-work")
-		rc := ReadyOnStdout(cmd)
+		rc := ReadyOnStdout(cmd, "")
 
 		select {
 		case err := <-rc:
@@ -70,7 +56,7 @@ func TestReadyOnStdout(t *testing.T) {
 		t.Parallel()
 
 		cmd := exec.Command("pwd")
-		rc := ReadyOnStdout(cmd, WithText("nope"), WithTimeout(time.Millisecond))
+		rc := ReadyOnStdout(cmd, "nope", Timeout(time.Millisecond))
 
 		select {
 		case err := <-rc:
@@ -92,7 +78,7 @@ func TestReadyOnStdout(t *testing.T) {
 		fi
 		`
 		cmd := exec.Command("bash", "-c", c)
-		rc := ReadyOnStdout(cmd, WithText("ok"), WithPollInterval(time.Millisecond))
+		rc := ReadyOnStdout(cmd, "ok", PollInterval(time.Millisecond))
 
 		select {
 		case err := <-rc:
@@ -110,7 +96,7 @@ func ExampleReadyOnStdout() {
 		quite versatile
 		wow
 	`)
-	ch := ReadyOnStdout(cmd, WithText("wow"), Times(2))
+	ch := ReadyOnStdout(cmd, "wow", Times(2))
 
 	<-ch
 	fmt.Println("that indeed happened")
