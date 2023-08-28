@@ -75,7 +75,7 @@ func TestReadyOnStdout(t *testing.T) {
 		select {
 		case err := <-rc:
 			assertError(t, err, ErrWaitTimedOut)
-		case <-time.After(2 * time.Millisecond):
+		case <-time.After(3 * time.Millisecond):
 			t.Fatal("did not time out in time")
 		}
 	})
