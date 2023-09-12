@@ -1,5 +1,5 @@
 # gompose
-![Coverage](https://img.shields.io/badge/Coverage-100.0%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-98.5%25-brightgreen)
 [![GoDoc](https://godoc.org/github.com/bkosm/gompose?status.svg)](https://godoc.org/github.com/bkosm/gompose)
 [![CI](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/bkosm/gompose/actions/workflows/codeql.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/codeql.yml)
@@ -30,10 +30,10 @@ import (
 func TestMain(m *testing.M) {
 	// Let's say we have a postgres container in the spec
 	err := g.Up(
-		g.WithWait(
-			g.ReadyOnLog(g.WithText("database system is ready to accept connections"), g.Times(2)),
+		g.Wait(
+			g.ReadyOnLog("database system is ready to accept connections", g.Times(2)),
 		),
-		g.WithSignalCallback(func(_ os.Signal) { // any action to be taken on SIGINT, SIGTERM
+		g.SignalCallback(func(_ os.Signal) { // any action to be taken on SIGINT, SIGTERM
 			_ = g.Down()
 		}),
 	)
@@ -63,14 +63,14 @@ Waiting is done the idiomatic way - you can await the ready channel without pass
 
 ```go
 //...
-err := g.Up(g.WithSignalCallback(func(_ os.Signal) { _ = g.Down() }))
+err := g.Up(g.SignalCallback(func(_ os.Signal) { _ = g.Down() }))
 if err != nil {
 	log.Fatal(err)
 }
 
 // do stuff
 
-readyOrErr := g.ReadyOnLog(g.WithText("database system is ready to accept connections"), g.Times(2))
+readyOrErr := g.ReadyOnLog("database system is ready to accept connections", g.Times(2))
 if err := <-readyOrErr; err != nil {
 	log.Fatal(err)
 }
@@ -83,18 +83,17 @@ code := m.Run()
 
 This can be done by using the `ReadyOnHttp` wait channel:
 ```go
-fc := g.MustT[*http.Request](t)
-hc := fc(http.NewRequest(http.MethodGet, "http://localhost:5432", nil))
+hc, _ := http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
 
-err := g.Up(g.WithWait(g.ReadyOnHttp(g.WithRequest(hc))))
+err := g.Up(g.Wait(g.ReadyOnHttp(*hc)))
 ```
 
 And you can customize what it means to be healthy too:
 ```go
-err := g.Up(g.WithWait(
+err := g.Up(g.Wait(
     g.ReadyOnHttp(
-        g.WithRequest(hc),
-        g.WithResponseVerifier(func (r *http.Response) (bool, error) {
+        *hc,
+        g.ResponseVerifier(func (r *http.Response) (bool, error) {
             return r.StatusCode == http.StatusUnauthorized, nil
         })
     ),

@@ -33,9 +33,9 @@ func TestUp(t *testing.T) {
 		defer testDown(t)
 
 		err := Up(
-			WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
-			WithCustomServices(customServiceName),
-			AsUpOpt(customFileOpt),
+			Wait(ReadyOnLog(expectedLogLine, customFileOpt)),
+			CustomServices(customServiceName),
+			customFileOpt,
 		)
 		assertNoError(t, err)
 		assertServiceIsUp(t)
@@ -52,9 +52,9 @@ func TestUp(t *testing.T) {
 		}
 
 		err := Up(
-			WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
-			WithSignalCallback(callback),
-			AsUpOpt(customFileOpt),
+			Wait(ReadyOnLog(expectedLogLine, customFileOpt)),
+			SignalCallback(callback),
+			customFileOpt,
 		)
 		assertNoError(t, err)
 		assertServiceIsUp(t)
@@ -71,7 +71,7 @@ func TestUp(t *testing.T) {
 		expected := errors.New("whoops")
 
 		go func() {
-			err := Up(WithWait(c), AsUpOpt(customFileOpt))
+			err := Up(Wait(c), customFileOpt)
 			assertError(t, err, expected)
 			close(done)
 		}()
@@ -83,14 +83,14 @@ func TestUp(t *testing.T) {
 
 func ExampleUp() {
 	_ = Up(
-		WithWait(ReadyOnLog(WithText(expectedLogLine), AsReadyOpt(customFileOpt))),
-		WithCustomServices(customServiceName),
-		AsUpOpt(customFileOpt),
+		Wait(ReadyOnLog(expectedLogLine, customFileOpt)),
+		CustomServices(customServiceName),
+		customFileOpt,
 	)
 
 	fmt.Println("the containers are ready to go!")
 	// Output:
 	// the containers are ready to go!
 
-	_ = Down(AsDownOpt(customFileOpt))
+	_ = Down(customFileOpt)
 }
