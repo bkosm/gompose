@@ -78,7 +78,3 @@ func reduceCustomFileOptions(file *customFile, opts []Option) {
 		}
 	}
 }
-
-func ptr[T any](v T) *T {
-	return &v
-}
