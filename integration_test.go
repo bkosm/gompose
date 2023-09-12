@@ -1,6 +1,8 @@
 package gompose
 
 import (
+	"io"
+	"net/http"
 	"os"
 	"syscall"
 	"testing"
@@ -24,6 +26,12 @@ func TestIntegration(t *testing.T) {
 		assertServiceIsUp(t)
 	}
 
+	teardown := func() {
+		err := Down()
+		assertNoError(t, err)
+		assertServiceIsDown(t)
+	}
+
 	t.Run("sets up the services", func(t *testing.T) {
 		setup()
 	})
@@ -38,9 +46,7 @@ func TestIntegration(t *testing.T) {
 	})
 
 	t.Run("cleans up on direct request", func(t *testing.T) {
-		err := Down()
-		assertNoError(t, err)
-		assertServiceIsDown(t)
+		teardown()
 	})
 
 	t.Run("allows for waiting on healthy http", func(t *testing.T) {
@@ -49,6 +55,26 @@ func TestIntegration(t *testing.T) {
 		err := Up(Wait(ReadyOnHttp(req)))
 		assertNoError(t, err)
 		assertServiceIsUp(t)
-		assertNoError(t, Down())
+
+		teardown()
+	})
+
+	t.Run("allows customising the response verifiers", func(t *testing.T) {
+		req := validRequest(t)
+
+		verifier := ResponseVerifier(func(res *http.Response) (bool, error) {
+			b, err := io.ReadAll(res.Body)
+			if err != nil {
+				return false, err
+			}
+
+			return string(b) == "ok\n", nil
+		})
+
+		err := Up(Wait(ReadyOnHttp(req, verifier, Timeout(3*time.Second))))
+		assertNoError(t, err)
+		assertServiceIsUp(t)
+
+		teardown()
 	})
 }

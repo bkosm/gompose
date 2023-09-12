@@ -23,7 +23,7 @@ const (
 	DefaultPollInterval = 100 * time.Millisecond
 
 	// DefaultWaitTimeout is the default timeout for waiting on readiness.
-	DefaultWaitTimeout = 10 * time.Minute
+	DefaultWaitTimeout = 5 * time.Minute
 )
 
 // DefaultResponseVerifier is the default response verifier used by ReadyOnHttp.
