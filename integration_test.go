@@ -13,10 +13,10 @@ func TestIntegration(t *testing.T) {
 
 	setup := func() {
 		err := Up(
-			WithWait(
-				ReadyOnLog(WithText(expectedLogLine)),
+			Wait(
+				ReadyOnLog(expectedLogLine),
 			),
-			WithSignalCallback(func(_ os.Signal) {
+			SignalCallback(func(_ os.Signal) {
 				_ = Down()
 			}),
 		)
@@ -46,7 +46,7 @@ func TestIntegration(t *testing.T) {
 	t.Run("allows for waiting on healthy http", func(t *testing.T) {
 		req := validRequest(t)
 
-		err := Up(WithWait(ReadyOnHttp(WithRequest(req))))
+		err := Up(Wait(ReadyOnHttp(req)))
 		assertNoError(t, err)
 		assertServiceIsUp(t)
 		assertNoError(t, Down())

@@ -11,27 +11,41 @@ import (
 // An ErrWaitTimedOut will be returned if the timeout is reached.
 // Times is defaulted to 1.
 // The command will be run once per poll interval.
-func ReadyOnStdout(cmd *exec.Cmd, fns ...ReadyOption) ReadyOrErrChan {
-	opts := &readyOptions{
-		awaiting:     "",
-		times:        1,
-		pollInterval: DefaultPollInterval,
-		timeout:      DefaultWaitTimeout,
-	}
-	for _, fn := range fns {
-		fn(opts)
-	}
+func ReadyOnStdout(cmd *exec.Cmd, awaiting string, opts ...Option) ReadyOrErrChan {
+	var (
+		customFile    customFile
+		readyOnStdout timeBased
+	)
+	reduceReadyOnStdoutOptions(&customFile, &readyOnStdout, opts)
+
 	readyOrErr := make(chan error)
 
-	go seekOrTimeout(opts.timeout, opts.pollInterval, readyOrErr, func() (bool, error) {
+	go seekOrTimeout(readyOnStdout.timeout, readyOnStdout.pollInterval, readyOrErr, func() (bool, error) {
 		if res, err := run(*cmd); err != nil {
 			return false, err
 		} else {
-			return countLogOccurrences(res, opts.awaiting) >= int(opts.times), nil
+			return countLogOccurrences(res, awaiting) >= int(readyOnStdout.times), nil
 		}
 	})
 
 	return readyOrErr
+}
+
+func reduceReadyOnStdoutOptions(file *customFile, time *timeBased, opts []Option) {
+	*time = timeBased{
+		times:        1,
+		timeout:      DefaultWaitTimeout,
+		pollInterval: DefaultPollInterval,
+	}
+
+	for _, opt := range opts {
+		if fn := opt.withCustomFileFunc; fn != nil {
+			fn(file)
+		}
+		if fn := opt.withTimeBasedFunc; fn != nil {
+			fn(time)
+		}
+	}
 }
 
 func countLogOccurrences(res cmdOutput, awaiting string) int {

@@ -10,24 +10,11 @@ import (
 )
 
 func TestReadyOnHttp(t *testing.T) {
-	t.Run("marks ready immediately with no options specified", func(t *testing.T) {
-		t.Parallel()
-
-		rc := ReadyOnHttp()
-
-		select {
-		case err := <-rc:
-			assertNoError(t, err)
-		case <-time.After(time.Second):
-			t.Fatal("was not ready in time")
-		}
-	})
-
 	t.Run("marks ready when default condition (status == 200) is met", func(t *testing.T) {
 		testUp(t)
 		defer testDown(t)
 
-		rc := ReadyOnHttp(WithRequest(validRequest(t)))
+		rc := ReadyOnHttp(validRequest(t))
 
 		select {
 		case err := <-rc:
@@ -40,9 +27,9 @@ func TestReadyOnHttp(t *testing.T) {
 
 	t.Run("times out when condition cannot be met", func(t *testing.T) {
 		rc := ReadyOnHttp(
-			WithRequest(validRequest(t)),
-			WithTimeout(2*time.Millisecond),
-			WithPollInterval(1*time.Millisecond),
+			validRequest(t),
+			Timeout(2*time.Millisecond),
+			PollInterval(1*time.Millisecond),
 		)
 
 		select {
@@ -65,7 +52,7 @@ func TestReadyOnHttp(t *testing.T) {
 
 			return string(bytes) == "ok\n", nil
 		}
-		rc := ReadyOnHttp(WithRequest(validRequest(t)), WithResponseVerifier(bodyIsOk))
+		rc := ReadyOnHttp(validRequest(t), ResponseVerifier(bodyIsOk))
 
 		select {
 		case err := <-rc:
@@ -85,9 +72,9 @@ func TestReadyOnHttp(t *testing.T) {
 			return false, expected
 		}
 		rc := ReadyOnHttp(
-			WithRequest(validRequest(t)),
-			WithResponseVerifier(troublemaker),
-			WithPollInterval(time.Second), // to avoid flakiness
+			validRequest(t),
+			ResponseVerifier(troublemaker),
+			PollInterval(time.Second), // to avoid flakiness
 		)
 
 		select {
@@ -100,14 +87,14 @@ func TestReadyOnHttp(t *testing.T) {
 }
 
 func ExampleReadyOnHttp() {
-	_ = Up(AsUpOpt(customFileOpt))
+	_ = Up(customFileOpt)
 	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", containerPort), nil)
-	ch := ReadyOnHttp(WithRequest(request))
+	ch := ReadyOnHttp(*request)
 
 	<-ch
 	fmt.Println("the service is up now")
 	// Output:
 	// the service is up now
 
-	_ = Down(AsDownOpt(customFileOpt))
+	_ = Down(customFileOpt)
 }
