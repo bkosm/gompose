@@ -24,6 +24,12 @@ const (
 
 	// DefaultWaitTimeout is the default timeout for waiting on readiness.
 	DefaultWaitTimeout = 5 * time.Minute
+
+	// SkipEnv is the key of the environment variable that is used for flagging.
+	SkipEnv = "GOMPOSE_SKIP"
+
+	// SkipDown is the flag used for skipping invoking compose Down without altering source code.
+	SkipDown = "down"
 )
 
 // DefaultResponseVerifier is the default response verifier used by ReadyOnHttp.

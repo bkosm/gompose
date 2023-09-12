@@ -77,4 +77,19 @@ func TestIntegration(t *testing.T) {
 
 		teardown()
 	})
+
+	t.Run("skips Down when an environment flag is present", func(t *testing.T) {
+		err := os.Setenv(SkipEnv, "DOWN,IGNORE")
+		assertNoError(t, err)
+
+		setup()
+
+		err = Down()
+		assertNoError(t, err)
+		assertEventually(t, serviceIsUp, 3*time.Second, 500*time.Millisecond)
+
+		err = os.Unsetenv(SkipEnv)
+		assertNoError(t, err)
+		teardown()
+	})
 }
