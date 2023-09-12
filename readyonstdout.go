@@ -9,14 +9,10 @@ import (
 // stdout or stderr produced by the specified exec.Cmd.
 // The channel will be closed immediately if no options are specified.
 // An ErrWaitTimedOut will be returned if the timeout is reached.
-// Times is defaulted to 1.
+// Times is defaulted to 1, the timeout and interval to DefaultWaitTimeout, DefaultPollInterval.
 // The command will be run once per poll interval.
 func ReadyOnStdout(cmd *exec.Cmd, awaiting string, opts ...Option) ReadyOrErrChan {
-	var (
-		customFile    customFile
-		readyOnStdout timeBased
-	)
-	reduceReadyOnStdoutOptions(&customFile, &readyOnStdout, opts)
+	readyOnStdout := reduceReadyOnStdoutOptions(opts)
 
 	readyOrErr := make(chan error)
 
@@ -31,21 +27,20 @@ func ReadyOnStdout(cmd *exec.Cmd, awaiting string, opts ...Option) ReadyOrErrCha
 	return readyOrErr
 }
 
-func reduceReadyOnStdoutOptions(file *customFile, time *timeBased, opts []Option) {
-	*time = timeBased{
+func reduceReadyOnStdoutOptions(opts []Option) timeBased {
+	time := timeBased{
 		times:        1,
 		timeout:      DefaultWaitTimeout,
 		pollInterval: DefaultPollInterval,
 	}
 
 	for _, opt := range opts {
-		if fn := opt.withCustomFileFunc; fn != nil {
-			fn(file)
-		}
 		if fn := opt.withTimeBasedFunc; fn != nil {
-			fn(time)
+			fn(&time)
 		}
 	}
+
+	return time
 }
 
 func countLogOccurrences(res cmdOutput, awaiting string) int {

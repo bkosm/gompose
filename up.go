@@ -8,15 +8,13 @@ import (
 )
 
 // Up starts containers specified in compose file.
-// It can be configured with a custom compose file path and a list of services to be started.
 // Returns an error if shell command fails or if the provided channel returns an error.
-// When provided WithWait option, the program execution is suspended until the channel is closed or returns an error.
+// When provided CustomFile option, compose definitions from that file are used.
+// When provided CustomServices option, only the specified services will be run from the compose spec.
+// When provided Wait option, the program execution is suspended until the channel is closed or returns an error.
+// When provided SignalCallback option, the specified function will be run on system interrupt.
 func Up(opts ...Option) error {
-	var (
-		file customFile
-		up   up
-	)
-	reduceUpOptions(&file, &up, opts)
+	file, up := reduceUpOptions(opts)
 
 	handleSignal(up.onSignal)
 
@@ -28,8 +26,9 @@ func Up(opts ...Option) error {
 	return handleWait(up.wait)
 }
 
-func reduceUpOptions(file *customFile, u *up, opts []Option) {
-	*u = up{
+func reduceUpOptions(opts []Option) (customFile, up) {
+	var file customFile
+	up := up{
 		wait:           nil,
 		onSignal:       nil,
 		customServices: nil,
@@ -37,12 +36,14 @@ func reduceUpOptions(file *customFile, u *up, opts []Option) {
 
 	for _, opt := range opts {
 		if fn := opt.withCustomFileFunc; fn != nil {
-			fn(file)
+			fn(&file)
 		}
 		if fn := opt.withUpFunc; fn != nil {
-			fn(u)
+			fn(&up)
 		}
 	}
+
+	return file, up
 }
 
 func getCommandArgs(customFile string, customServices []string) []string {

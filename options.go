@@ -41,6 +41,7 @@ func CustomFile(filepath string) Option {
 	}
 }
 
+// Times sets the amount of retries that should take place before failing.
 func Times(times uint) Option {
 	return Option{
 		withTimeBasedFunc: func(opt *timeBased) {
@@ -49,6 +50,7 @@ func Times(times uint) Option {
 	}
 }
 
+// Timeout sets the duration after which lack of success should propagate failure.
 func Timeout(timeout time.Duration) Option {
 	return Option{
 		withTimeBasedFunc: func(opt *timeBased) {
@@ -57,6 +59,7 @@ func Timeout(timeout time.Duration) Option {
 	}
 }
 
+// PollInterval sets the duration that is waited between successive attempts.
 func PollInterval(pollInterval time.Duration) Option {
 	return Option{
 		withTimeBasedFunc: func(opt *timeBased) {
@@ -65,6 +68,7 @@ func PollInterval(pollInterval time.Duration) Option {
 	}
 }
 
+// ResponseVerifier sets the function that verifies a http.Response obtained through ReadyOnHttp.
 func ResponseVerifier(verifier func(response *http.Response) (bool, error)) Option {
 	return Option{
 		withResponseVerifierFunc: func(opt *responseVerifier) {
@@ -76,6 +80,7 @@ func ResponseVerifier(verifier func(response *http.Response) (bool, error)) Opti
 	}
 }
 
+// Wait sets the wait channel for a gompose command.
 func Wait(channel ReadyOrErrChan) Option {
 	return Option{
 		withUpFunc: func(opt *up) {
@@ -84,6 +89,8 @@ func Wait(channel ReadyOrErrChan) Option {
 	}
 }
 
+// SignalCallback sets the callback that is executed whenever a system interrupt happens while the command
+// is executing or when the system awaits readiness.
 func SignalCallback(callback func(os.Signal)) Option {
 	return Option{
 		withUpFunc: func(opt *up) {
@@ -92,6 +99,8 @@ func SignalCallback(callback func(os.Signal)) Option {
 	}
 }
 
+// CustomServices sets a list of services, picked from the default spec or the one provided through CustomFile,
+// that should be started with Up.
 func CustomServices(services ...string) Option {
 	return Option{
 		withUpFunc: func(opt *up) {

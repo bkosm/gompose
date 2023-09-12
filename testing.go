@@ -5,8 +5,8 @@ type tt interface {
 	Fatal(args ...any)
 }
 
-// MustT is a helper function returns a value factory which will eliminate the need to check for errors
-// when spawning stubs and fixtures for testing.
+// MustT is a helper function that returns a value factory which will eliminate the
+// need to check for errors when spawning stubs and fixtures for testing.
 // Pass it the instance of *testing.T.
 func MustT[T any](t interface{}) func(v T, err error) T {
 	tt := t.(tt)

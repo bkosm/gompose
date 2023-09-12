@@ -71,10 +71,14 @@ func seekOrTimeout(
 	}
 }
 
-func reduceCustomFileOptions(file *customFile, opts []Option) {
+func reduceCustomFileOptions(opts []Option) customFile {
+	var file customFile
+
 	for _, opt := range opts {
 		if fn := opt.withCustomFileFunc; fn != nil {
-			fn(file)
+			fn(&file)
 		}
 	}
+
+	return file
 }
