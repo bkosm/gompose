@@ -1,5 +1,5 @@
 # gompose
-![Coverage](https://img.shields.io/badge/Coverage-97.9%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-98.5%25-brightgreen)
 [![GoDoc](https://godoc.org/github.com/bkosm/gompose?status.svg)](https://godoc.org/github.com/bkosm/gompose)
 [![CI](https://github.com/bkosm/gompose/actions/workflows/ci.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/bkosm/gompose/actions/workflows/codeql.yml/badge.svg)](https://github.com/bkosm/gompose/actions/workflows/codeql.yml)
@@ -82,6 +82,7 @@ code := m.Run()
 #### but I want to wait until service passes health-checks
 
 This can be done by using the `ReadyOnHttp` wait channel:
+
 ```go
 hc, _ := http.NewRequest(http.MethodGet, "http://localhost:5432", nil)
 
@@ -89,6 +90,7 @@ err := g.Up(g.Wait(g.ReadyOnHttp(*hc)))
 ```
 
 And you can customize what it means to be healthy too:
+
 ```go
 err := g.Up(g.Wait(
     g.ReadyOnHttp(
@@ -98,6 +100,93 @@ err := g.Up(g.Wait(
         })
     ),
 ))
+```
+
+#### miscellaneous
+
+##### skip down non-programmatically
+
+When an environment variable of `GOMPOSE_SKIP` is set with a value including `down`
+(as a comma delimited string), the invocation of `docker-compose down` is skipped, leaving out the
+environment in the state it was during the tests. This can be helpful while debugging and
+during development, in cases where the services needed require significant effort to start.
+
+##### all the commands with all their options - as examples
+
+```go
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"net/http"
+	"os"
+	"os/exec"
+	"time"
+
+	g "github.com/bkosm/gompose"
+)
+
+func main() {
+	// ready on stdout
+	cmd := exec.Command("echo", "1")
+	wait := g.Wait(
+		g.ReadyOnStdout(
+			cmd,
+			"1",
+			g.Times(1),
+			g.Timeout(time.Minute),
+			g.PollInterval(time.Second),
+		),
+	)
+
+	// ready on log
+	wait = g.Wait(
+		g.ReadyOnLog(
+			"log line",
+			g.CustomFile("other/compose.yaml"),
+			g.Times(3),
+			g.Timeout(2*time.Minute),
+			g.PollInterval(3*time.Second),
+		),
+	)
+
+	// ready on http
+	payload := `{
+            "is_fine": true
+        }`
+	req, _ := http.NewRequest(
+		http.MethodPut,
+		"http://myservice/api",
+		bytes.NewReader([]byte(payload)),
+	)
+	wait = g.Wait(
+		g.ReadyOnHttp(
+			*req,
+			g.Times(1),
+			g.Timeout(time.Minute),
+			g.PollInterval(time.Second),
+			g.ResponseVerifier(func(_ *http.Response) (bool, error) {
+				return true, nil
+			}),
+		),
+	)
+
+	// Up
+	_ = g.Up(
+		g.CustomFile("other/compose.yaml"),
+		g.CustomServices("s1", "s2"),
+		g.SignalCallback(func(s os.Signal) {
+			fmt.Println("interrupt!")
+		}),
+		wait,
+	)
+
+	// Down
+	_ = g.Down(
+		g.CustomFile("other/compose.yaml"),
+	)
+}
 ```
 
 ## contributing
