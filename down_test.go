@@ -15,7 +15,7 @@ func TestDown(t *testing.T) {
 	})
 
 	t.Run("down does not fail if there was no up before", func(t *testing.T) {
-		err := Down(AsDownOpt(customFileOpt))
+		err := Down(customFileOpt)
 		assertNoError(t, err)
 	})
 
@@ -25,14 +25,14 @@ func TestDown(t *testing.T) {
 			return serviceIsUp()
 		}, time.Second, 50*time.Millisecond)
 
-		err := Down(AsDownOpt(customFileOpt))
+		err := Down(customFileOpt)
 		assertNoError(t, err)
 		assertServiceIsDown(t)
 	})
 }
 
 func ExampleDown() {
-	err := Down(AsDownOpt(WithCustomFile("./testdata/docker-compose.yml")))
+	err := Down(CustomFile("./testdata/docker-compose.yml"))
 	fmt.Print(err)
 
 	// Output:

@@ -17,7 +17,7 @@ const (
 	containerPort     = 5678
 )
 
-var customFileOpt = WithCustomFile("./testdata/docker-compose.yml")
+var customFileOpt = CustomFile("./testdata/docker-compose.yml")
 
 func testUp(t *testing.T) {
 	t.Helper()
@@ -101,14 +101,15 @@ func doSignal(t *testing.T, s syscall.Signal) {
 	}
 }
 
-func validRequest(t *testing.T) *http.Request {
+func validRequest(t *testing.T) http.Request {
 	t.Helper()
 
-	return MustT[*http.Request](t)(http.NewRequest(
+	req := MustT[*http.Request](t)(http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("http://localhost:%d", containerPort),
 		nil,
 	))
+	return *req
 }
 
 // assertEventually is a helper function copied from stretchr/testify

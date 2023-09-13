@@ -1,6 +1,8 @@
 package gompose
 
 import (
+	"io"
+	"net/http"
 	"os"
 	"syscall"
 	"testing"
@@ -13,15 +15,21 @@ func TestIntegration(t *testing.T) {
 
 	setup := func() {
 		err := Up(
-			WithWait(
-				ReadyOnLog(WithText(expectedLogLine)),
+			Wait(
+				ReadyOnLog(expectedLogLine),
 			),
-			WithSignalCallback(func(_ os.Signal) {
+			SignalCallback(func(_ os.Signal) {
 				_ = Down()
 			}),
 		)
 		assertNoError(t, err)
 		assertServiceIsUp(t)
+	}
+
+	teardown := func() {
+		err := Down()
+		assertNoError(t, err)
+		assertServiceIsDown(t)
 	}
 
 	t.Run("sets up the services", func(t *testing.T) {
@@ -38,17 +46,50 @@ func TestIntegration(t *testing.T) {
 	})
 
 	t.Run("cleans up on direct request", func(t *testing.T) {
-		err := Down()
-		assertNoError(t, err)
-		assertServiceIsDown(t)
+		teardown()
 	})
 
 	t.Run("allows for waiting on healthy http", func(t *testing.T) {
 		req := validRequest(t)
 
-		err := Up(WithWait(ReadyOnHttp(WithRequest(req))))
+		err := Up(Wait(ReadyOnHttp(req)))
 		assertNoError(t, err)
 		assertServiceIsUp(t)
-		assertNoError(t, Down())
+
+		teardown()
+	})
+
+	t.Run("allows customising the response verifiers", func(t *testing.T) {
+		req := validRequest(t)
+
+		verifier := ResponseVerifier(func(res *http.Response) (bool, error) {
+			b, err := io.ReadAll(res.Body)
+			if err != nil {
+				return false, err
+			}
+
+			return string(b) == "ok\n", nil
+		})
+
+		err := Up(Wait(ReadyOnHttp(req, verifier, Timeout(3*time.Second))))
+		assertNoError(t, err)
+		assertServiceIsUp(t)
+
+		teardown()
+	})
+
+	t.Run("skips Down when an environment flag is present", func(t *testing.T) {
+		err := os.Setenv(SkipEnv, "DOWN,IGNORE")
+		assertNoError(t, err)
+
+		setup()
+
+		err = Down()
+		assertNoError(t, err)
+		assertEventually(t, serviceIsUp, 3*time.Second, 500*time.Millisecond)
+
+		err = os.Unsetenv(SkipEnv)
+		assertNoError(t, err)
+		teardown()
 	})
 }
