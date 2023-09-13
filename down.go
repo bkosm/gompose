@@ -1,45 +1,43 @@
 package gompose
 
 import (
+	"os"
 	"os/exec"
+	"strings"
 )
-
-type (
-	// DownOption is a function that configures docker-compose down invocation.
-	DownOption func(*downOpts)
-
-	downOpts struct {
-		customFile *string
-	}
-)
-
-// AsDownOpt converts GlobalOption s which are useful in the context of Down to a DownOption.
-func AsDownOpt(fns ...GlobalOption) DownOption {
-	g := &globalOpts{customFile: nil}
-	for _, fn := range fns {
-		fn(g)
-	}
-
-	return func(o *downOpts) {
-		o.customFile = g.customFile
-	}
-}
 
 // Down stops and removes containers, networks, images, and volumes specified in compose file.
 // It can be configured with a custom compose file path.
 // Returns an error if shell command fails.
-func Down(fns ...DownOption) error {
-	opts := &downOpts{customFile: nil}
-	for _, fn := range fns {
-		fn(opts)
+// Skips the command invocation if the current shell has a CSV environment variable with the key of SkipEnv
+// set with a value of SkipDown. This allows for retaining the services between runs without altering source code.
+func Down(opts ...Option) error {
+	if shouldSkipCommand() {
+		return nil
 	}
 
+	customFile := reduceCustomFileOptions(opts)
+
 	var args []string
-	if opts.customFile != nil {
-		args = []string{"-f", *opts.customFile}
+	if customFile != "" {
+		args = []string{"-f", string(customFile)}
 	}
 	args = append(args, "down")
 
 	_, err := run(*exec.Command("docker-compose", args...))
 	return err
+}
+
+func shouldSkipCommand() bool {
+	val, ok := os.LookupEnv(SkipEnv)
+	if !ok {
+		return false
+	}
+
+	for _, token := range strings.Split(val, ",") {
+		if strings.ToLower(token) == SkipDown {
+			return true
+		}
+	}
+	return false
 }
