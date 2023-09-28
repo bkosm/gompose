@@ -8,11 +8,24 @@ import "net/http"
 // When it comes to timing defaults, those from ReadyOnStdout apply here too.
 // If the request fails due to a network error, the request will be retried until the timeout is reached.
 func ReadyOnHttp(request http.Request, opts ...Option) ReadyOrErrChan {
-	time, verifier := reduceReadyOnHttpOptions(opts)
+	verifier := responseVerifier(DefaultResponseVerifier)
+	options := timeBased{
+		times:        1,
+		timeout:      DefaultWaitTimeout,
+		pollInterval: DefaultPollInterval,
+	}
+	for _, opt := range opts {
+		if fn := opt.withTimeBasedFunc; fn != nil {
+			fn(&options)
+		}
+		if fn := opt.withResponseVerifierFunc; fn != nil {
+			fn(&verifier)
+		}
+	}
 
 	readyOrErr := make(chan error)
 
-	go seekOrTimeout(time.timeout, time.pollInterval, readyOrErr, func() (bool, error) {
+	go seekOrTimeout(options.timeout, options.pollInterval, readyOrErr, func() (bool, error) {
 		resp, err := http.DefaultClient.Do(&request)
 		if err != nil {
 			return false, nil // retry it anyways
@@ -27,24 +40,4 @@ func ReadyOnHttp(request http.Request, opts ...Option) ReadyOrErrChan {
 	})
 
 	return readyOrErr
-}
-
-func reduceReadyOnHttpOptions(opts []Option) (timeBased, responseVerifier) {
-	time := timeBased{
-		times:        1,
-		timeout:      DefaultWaitTimeout,
-		pollInterval: DefaultPollInterval,
-	}
-	verifier := responseVerifier(DefaultResponseVerifier)
-
-	for _, opt := range opts {
-		if fn := opt.withTimeBasedFunc; fn != nil {
-			fn(&time)
-		}
-		if fn := opt.withResponseVerifierFunc; fn != nil {
-			fn(&verifier)
-		}
-	}
-
-	return time, verifier
 }

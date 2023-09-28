@@ -16,7 +16,12 @@ func Down(opts ...Option) error {
 		return nil
 	}
 
-	customFile := reduceCustomFileOptions(opts)
+	var customFile customFile
+	for _, opt := range opts {
+		if fn := opt.withCustomFileFunc; fn != nil {
+			fn(&customFile)
+		}
+	}
 
 	var args []string
 	if customFile != "" {
