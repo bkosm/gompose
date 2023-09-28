@@ -14,36 +14,29 @@ import (
 // When provided Wait option, the program execution is suspended until the channel is closed or returns an error.
 // When provided SignalCallback option, the specified function will be run on system interrupt.
 func Up(opts ...Option) error {
-	file, up := reduceUpOptions(opts)
-
-	handleSignal(up.onSignal)
-
-	args := getCommandArgs(string(file), up.customServices)
-	if _, err := run(*exec.Command("docker-compose", args...)); err != nil {
-		return err
-	}
-
-	return handleWait(up.wait)
-}
-
-func reduceUpOptions(opts []Option) (customFile, up) {
-	var file customFile
-	up := up{
+	var customFile customFile
+	options := up{
 		wait:           nil,
 		onSignal:       nil,
 		customServices: nil,
 	}
-
 	for _, opt := range opts {
 		if fn := opt.withCustomFileFunc; fn != nil {
-			fn(&file)
+			fn(&customFile)
 		}
 		if fn := opt.withUpFunc; fn != nil {
-			fn(&up)
+			fn(&options)
 		}
 	}
 
-	return file, up
+	handleSignal(options.onSignal)
+
+	args := getCommandArgs(string(customFile), options.customServices)
+	if _, err := run(*exec.Command("docker-compose", args...)); err != nil {
+		return err
+	}
+
+	return handleWait(options.wait)
 }
 
 func getCommandArgs(customFile string, customServices []string) []string {

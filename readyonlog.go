@@ -7,7 +7,12 @@ import "os/exec"
 // This function proxies the responsibility to ReadyOnStdout by providing it the output of compose logs.
 // Can be configured with CustomFile to read from custom compose spec.
 func ReadyOnLog(awaiting string, opts ...Option) ReadyOrErrChan {
-	customFile := reduceCustomFileOptions(opts)
+	var customFile customFile
+	for _, opt := range opts {
+		if fn := opt.withCustomFileFunc; fn != nil {
+			fn(&customFile)
+		}
+	}
 
 	var args []string
 	if customFile != "" {
