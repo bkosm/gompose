@@ -83,7 +83,7 @@ func TestUp(t *testing.T) {
 
 func ExampleUp() {
 	_ = Up(
-		Wait(ReadyOnLog(expectedLogLine, customFileOpt)),
+		Wait(ReadyOnLog(expectedLogLine, CustomFile("./testdata/docker-compose.yml"))),
 		CustomServices(customServiceName),
 		customFileOpt,
 	)

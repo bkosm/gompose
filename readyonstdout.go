@@ -12,35 +12,28 @@ import (
 // Times is defaulted to 1, the timeout and interval to DefaultWaitTimeout, DefaultPollInterval.
 // The command will be run once per poll interval.
 func ReadyOnStdout(cmd *exec.Cmd, awaiting string, opts ...Option) ReadyOrErrChan {
-	readyOnStdout := reduceReadyOnStdoutOptions(opts)
-
-	readyOrErr := make(chan error)
-
-	go seekOrTimeout(readyOnStdout.timeout, readyOnStdout.pollInterval, readyOrErr, func() (bool, error) {
-		if res, err := run(*cmd); err != nil {
-			return false, err
-		} else {
-			return countLogOccurrences(res, awaiting) >= int(readyOnStdout.times), nil
-		}
-	})
-
-	return readyOrErr
-}
-
-func reduceReadyOnStdoutOptions(opts []Option) timeBased {
-	time := timeBased{
+	options := timeBased{
 		times:        1,
 		timeout:      DefaultWaitTimeout,
 		pollInterval: DefaultPollInterval,
 	}
-
 	for _, opt := range opts {
 		if fn := opt.withTimeBasedFunc; fn != nil {
-			fn(&time)
+			fn(&options)
 		}
 	}
 
-	return time
+	readyOrErr := make(chan error)
+
+	go seekOrTimeout(options.timeout, options.pollInterval, readyOrErr, func() (bool, error) {
+		if res, err := run(*cmd); err != nil {
+			return false, err
+		} else {
+			return countLogOccurrences(res, awaiting) >= int(options.times), nil
+		}
+	})
+
+	return readyOrErr
 }
 
 func countLogOccurrences(res cmdOutput, awaiting string) int {

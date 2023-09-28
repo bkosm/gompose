@@ -87,7 +87,7 @@ func TestReadyOnHttp(t *testing.T) {
 }
 
 func ExampleReadyOnHttp() {
-	_ = Up(customFileOpt)
+	_ = Up(CustomFile("./testdata/docker-compose.yml"))
 	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", containerPort), nil)
 	ch := ReadyOnHttp(*request)
 
