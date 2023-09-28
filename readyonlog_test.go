@@ -23,8 +23,9 @@ func TestReadyOnLog(t *testing.T) {
 }
 
 func ExampleReadyOnLog() {
-	_ = Up(customFileOpt)
-	ch := ReadyOnLog(expectedLogLine, customFileOpt)
+	customFile := CustomFile("./testdata/docker-compose.yml")
+	_ = Up(customFile)
+	ch := ReadyOnLog(expectedLogLine, customFile)
 
 	<-ch
 	fmt.Println("the service is up now")

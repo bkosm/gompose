@@ -86,7 +86,7 @@ func TestIntegration(t *testing.T) {
 
 		err = Down()
 		assertNoError(t, err)
-		assertEventually(t, serviceIsUp, 3*time.Second, 500*time.Millisecond)
+		assertServiceIsUp(t)
 
 		err = os.Unsetenv(SkipEnv)
 		assertNoError(t, err)

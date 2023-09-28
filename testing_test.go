@@ -74,8 +74,9 @@ func TestMustTWorks(t *testing.T) {
 	})
 }
 
+var t = &ft{}
+
 func ExampleMustT() {
-	t := &ft{}
 	fn := MustT[*http.Request](t)
 
 	rq := fn(http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", containerPort), nil))
