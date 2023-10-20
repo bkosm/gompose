@@ -90,6 +90,9 @@ func goIntoTestDataDir(t *testing.T) func() {
 		t.Fatal(err)
 	}
 
+	cwd, _ := os.Getwd()
+	t.Logf("PWD=%s", cwd)
+
 	return func() {
 		err = os.Chdir(startDir)
 		if err != nil {
