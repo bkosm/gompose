@@ -13,7 +13,7 @@ func PostgresViaLogs(opts ...Option) ReadyOrErrChan {
 
 // DownOnSignal is an alias for an option that provides a SignalCallback which performs a Down in
 // case of any system interrupt.
-// Make sure to provide the custom file option as a parameter if such is used for Up.
+// Make sure to provide the CustomFile as a parameter if such is used for Up.
 func DownOnSignal(opts ...Option) Option {
 	return SignalCallback(func(_ os.Signal) { _ = Down(opts...) })
 }
