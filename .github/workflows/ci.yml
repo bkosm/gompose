@@ -24,10 +24,12 @@ jobs:
 
       - name: Go Lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: v2
 
       - name: Run Test
         run: |
-          go test -v ./... -covermode=count -coverprofile=coverage.out
+          go test ./v2 -v -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
       - name: Go Coverage Badge

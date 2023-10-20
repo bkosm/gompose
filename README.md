@@ -24,7 +24,7 @@ import (
 	"os"
 	"testing"
 
-	g "github.com/bkosm/gompose"
+	g "github.com/bkosm/gompose/v2"
 )
 
 func TestMain(m *testing.M) {
@@ -124,7 +124,7 @@ import (
 	"os/exec"
 	"time"
 
-	g "github.com/bkosm/gompose"
+	g "github.com/bkosm/gompose/v2"
 )
 
 func main() {
