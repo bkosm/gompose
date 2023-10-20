@@ -1,8 +1,0 @@
-version: '3.8'
-services:
-  echo:
-    image: hashicorp/http-echo:alpine
-    restart: always
-    command: -text="ok"
-    ports:
-      - "5678:5678"
