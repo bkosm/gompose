@@ -32,10 +32,13 @@ jobs:
           go test ./v2 -v -cover -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out
 
-      - name: Coveralls
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      - name: Install goveralls
+        run: go install github.com/mattn/goveralls@latest
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: goveralls -coverprofile=coverage.out -service=github
 
       - name: Bump version and push tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
