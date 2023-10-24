@@ -13,6 +13,10 @@ type (
 		timeout      time.Duration
 		pollInterval time.Duration
 	}
+	retry struct {
+		times    uint
+		interval time.Duration
+	}
 	responseVerifier func(*http.Response) (bool, error)
 	up               struct {
 		wait           ReadyOrErrChan
@@ -26,6 +30,7 @@ type (
 		withTimeBasedFunc        func(*timeBased)
 		withResponseVerifierFunc func(*responseVerifier)
 		withUpFunc               func(*up)
+		withRetryFunc            func(*retry)
 	}
 )
 
@@ -105,6 +110,17 @@ func CustomServices(services ...string) Option {
 	return Option{
 		withUpFunc: func(opt *up) {
 			opt.customServices = services
+		},
+	}
+}
+
+// RetryCommand will attempt to run the command again in case of failure (e.g. when running Up)
+// given amount of times, each after specified interval.
+func RetryCommand(times uint, interval time.Duration) Option {
+	return Option{
+		withRetryFunc: func(opt *retry) {
+			opt.times = times
+			opt.interval = interval
 		},
 	}
 }
