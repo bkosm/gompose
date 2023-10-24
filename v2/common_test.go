@@ -10,7 +10,7 @@ func Test_doRetry(t *testing.T) {
 	t.Run("should return immediately in case of no error", func(t *testing.T) {
 		start := time.Now()
 		defer func() {
-			if time.Now().Sub(start) > time.Second {
+			if time.Since(start) > time.Second {
 				t.Fail()
 			}
 		}()
@@ -24,7 +24,7 @@ func Test_doRetry(t *testing.T) {
 	t.Run("should return error after all attempts", func(t *testing.T) {
 		start := time.Now()
 		defer func() {
-			if time.Now().Sub(start) < time.Millisecond*10 {
+			if time.Since(start) < time.Millisecond*10 {
 				t.Fail()
 			}
 		}()
@@ -38,7 +38,7 @@ func Test_doRetry(t *testing.T) {
 	t.Run("should return success after a retry if the operation passed", func(t *testing.T) {
 		start := time.Now()
 		defer func() {
-			if time.Now().Sub(start) < time.Millisecond*10 {
+			if time.Since(start) < time.Millisecond*10 {
 				t.Fail()
 			}
 		}()
