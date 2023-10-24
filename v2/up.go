@@ -13,6 +13,8 @@ import (
 // When provided CustomServices option, only the specified services will be run from the compose spec.
 // When provided Wait option, the program execution is suspended until the channel is closed or returns an error.
 // When provided SignalCallback option, the specified function will be run on system interrupt.
+// When provided RetryCommand option, the docker-compose command will be retried specified number of times in case of failure,
+// each after the specified interval. Defaults to a single execution.
 func Up(opts ...Option) error {
 	var customFile customFile
 	options := up{
@@ -20,6 +22,10 @@ func Up(opts ...Option) error {
 		onSignal:       nil,
 		customServices: nil,
 	}
+	retry := retry{
+		times: 1,
+	}
+
 	for _, opt := range opts {
 		if fn := opt.withCustomFileFunc; fn != nil {
 			fn(&customFile)
@@ -27,12 +33,19 @@ func Up(opts ...Option) error {
 		if fn := opt.withUpFunc; fn != nil {
 			fn(&options)
 		}
+		if fn := opt.withRetryFunc; fn != nil {
+			fn(&retry)
+		}
 	}
 
 	handleSignal(options.onSignal)
 
 	args := getCommandArgs(string(customFile), options.customServices)
-	if _, err := run(*exec.Command("docker-compose", args...)); err != nil {
+	err := doRetry(retry.times, retry.interval, func() error {
+		_, err := run(*exec.Command("docker-compose", args...))
+		return err
+	})
+	if err != nil {
 		return err
 	}
 
