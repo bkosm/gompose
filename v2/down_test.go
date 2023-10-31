@@ -21,9 +21,7 @@ func TestDown(t *testing.T) {
 
 	t.Run("down cleans up after a successful setup", func(t *testing.T) {
 		testUp(t)
-		assertEventually(t, func() bool {
-			return serviceIsUp()
-		}, time.Second, 50*time.Millisecond)
+		assertEventually(t, serviceIsUp, time.Second, 50*time.Millisecond)
 
 		err := Down(customFileOpt)
 		assertNoError(t, err)
