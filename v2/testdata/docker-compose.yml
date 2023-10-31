@@ -3,6 +3,7 @@ services:
   echo:
     image: hashicorp/http-echo:alpine
     restart: always
+    platform: linux/amd64
     command: -text="ok"
     ports:
       - "5678:5678"

@@ -26,7 +26,7 @@ func TestUp(t *testing.T) {
 
 		err := Up()
 		assertNoError(t, err)
-		assertServiceIsUp(t)
+		assertEventually(t, serviceIsUp, time.Second, 100*time.Millisecond)
 	})
 
 	t.Run("up works with options", func(t *testing.T) {

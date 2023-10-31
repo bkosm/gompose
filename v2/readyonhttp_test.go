@@ -67,13 +67,16 @@ func TestReadyOnHttp(t *testing.T) {
 		testUp(t)
 		defer testDown(t)
 
+		assertEventually(t, serviceIsUp, time.Second, 100*time.Millisecond)
+
 		expected := errors.New("whoops")
-		troublemaker := func(resp *http.Response) (bool, error) {
+		troublemaker := ResponseVerifier(func(_ *http.Response) (bool, error) {
 			return false, expected
-		}
+		})
+
 		rc := ReadyOnHttp(
 			validRequest(t),
-			ResponseVerifier(troublemaker),
+			troublemaker,
 			PollInterval(time.Second), // to avoid flakiness
 		)
 
