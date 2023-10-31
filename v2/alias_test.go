@@ -12,4 +12,8 @@ func TestAliases(t *testing.T) {
 	t.Run("DownOnSignal", func(t *testing.T) {
 		_ = DownOnSignal(customFileOpt)
 	})
+
+	t.Run("Retry", func(t *testing.T) {
+		_ = Retry()
+	})
 }

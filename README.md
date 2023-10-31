@@ -179,6 +179,7 @@ func main() {
 		g.SignalCallback(func(s os.Signal) {
 			fmt.Println("interrupt!")
 		}),
+		g.RetryCommand(3, time.Second*10),
 		wait,
 	)
 

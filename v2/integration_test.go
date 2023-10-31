@@ -21,6 +21,7 @@ func TestIntegration(t *testing.T) {
 			SignalCallback(func(_ os.Signal) {
 				_ = Down()
 			}),
+			RetryCommand(3, time.Second),
 		)
 		assertNoError(t, err)
 		assertServiceIsUp(t)

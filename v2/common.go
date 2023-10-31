@@ -76,3 +76,17 @@ func seekOrTimeout(
 		close(foundOrErr)
 	}
 }
+
+func doRetry(times uint, interval time.Duration, op func() error) error {
+	err := op()
+	for i := 0; i < int(times)-1; i++ {
+		if err != nil {
+			time.Sleep(interval)
+			err = op()
+		} else {
+			return nil
+		}
+	}
+
+	return err
+}
